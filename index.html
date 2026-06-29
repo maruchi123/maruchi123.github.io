@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0F3D38" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
   <title>Isuru Bag Center — Sign in</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,6 +61,12 @@
       box-shadow:0 8px 24px rgba(0,0,0,.25);
     }
     .badge svg{width:34px;height:34px}
+    .logo-panel{
+      background:#fff;border-radius:20px;padding:18px 22px;
+      display:inline-block;margin:0 auto 16px;
+      box-shadow:0 10px 28px rgba(0,0,0,.28);
+    }
+    .logo-panel img{display:block;width:210px;max-width:62vw;height:auto}
     .brand h1{
       font-size:22px;font-weight:800;letter-spacing:-.3px;
       line-height:1.2;
@@ -178,14 +187,9 @@
   <div class="wrap">
 
     <div class="brand">
-      <div class="badge" aria-hidden="true">
-        <!-- simple bag mark -->
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 8h14l-1 12H6L5 8Z" fill="#fff"/>
-          <path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="#C8862A" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
+      <div class="logo-panel">
+        <img src="logo.png" alt="Isuru Bag Center" />
       </div>
-      <h1>Isuru Bag Center</h1>
       <p>Staff operations</p>
     </div>
 

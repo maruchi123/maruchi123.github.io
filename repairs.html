@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F3D38" />
+  <title>Repairs · Isuru Bag Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pine:#0F3D38; --pine-deep:#0A2C28; --pine-soft:#1C5A53;
+      --honey:#E0A340; --honey-deep:#C8862A;
+      --ink:#12211F; --muted:#6B7C79; --line:#E4E8E6;
+      --card:#FFF; --field:#F5F7F6; --bg:#F1F4F2;
+      --danger:#B23B3B; --danger-bg:#FBEDED; --ok:#1E7A52;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased}
+
+    .topbar{position:sticky;top:0;z-index:20;background:var(--pine);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+    .topbar a.back{color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14)}
+    .topbar a.back:hover{background:rgba(255,255,255,.22)}
+    .topbar a.back svg{width:18px;height:18px}
+    .topbar .title{flex:1;min-width:0}
+    .topbar .title h1{font-size:16px;font-weight:700;line-height:1.1}
+    .topbar .title span{font-size:11.5px;color:rgba(255,255,255,.65)}
+    .topbar button{font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:none;border-radius:9px;padding:8px 11px;cursor:pointer}
+    .topbar button:hover{background:rgba(255,255,255,.22)}
+
+    .page{max-width:760px;margin:0 auto;padding:16px 16px 90px}
+
+    .newbtn{width:100%;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+    .newbtn:hover{background:#0c322e}
+    .newbtn svg{width:18px;height:18px}
+
+    .form-card{display:none;background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:18px;border:1px solid var(--line);box-shadow:0 6px 20px rgba(15,61,56,.06)}
+    .form-card.open{display:block}
+    .form-card h2{font-size:16px;font-weight:700;margin-bottom:16px}
+    .form-msg{display:none;font-size:13px;font-weight:500;padding:10px 12px;border-radius:10px;margin-bottom:14px;background:var(--danger-bg);color:var(--danger);border:1px solid #F3D6D6}
+
+    .photo-pick{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--field);margin-bottom:16px}
+    .photo-pick:hover{border-color:var(--pine-soft)}
+    .photo-pick svg{width:28px;height:28px;color:var(--muted);margin-bottom:6px}
+    .photo-pick p{font-size:13px;color:var(--muted);font-weight:500}
+    .photo-pick .hint{font-size:11px;margin-top:2px}
+    .photo-pick img{max-width:100%;max-height:200px;border-radius:10px;display:block;margin:0 auto}
+
+    .lbl{display:block;font-size:12.5px;font-weight:600;margin-bottom:7px}
+    .inp{width:100%;font-family:inherit;font-size:15px;padding:12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);margin-bottom:14px}
+    .inp:focus{outline:none;border-color:var(--pine-soft);box-shadow:0 0 0 3px rgba(28,90,83,.10)}
+    textarea.inp{resize:vertical;min-height:60px}
+    .row2{display:flex;gap:12px}
+    .row2 > div{flex:1}
+
+    .toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:11px 12px;background:var(--field);border-radius:11px}
+    .toggle-row label{font-size:13.5px;font-weight:600;flex:1;cursor:pointer}
+    .switch{position:relative;width:44px;height:25px;flex:none}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;inset:0;background:#CBD4D1;border-radius:30px;transition:.2s;cursor:pointer}
+    .slider:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+    .switch input:checked + .slider{background:var(--pine)}
+    .switch input:checked + .slider:before{transform:translateX(19px)}
+
+    .form-actions{display:flex;gap:10px;margin-top:4px}
+    .btn-primary{flex:1;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;min-height:50px}
+    .btn-primary:hover{background:#0c322e}
+    .btn-primary:disabled{background:var(--muted);cursor:default}
+    .btn-cancel{flex:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer}
+    .btn-cancel:hover{background:var(--field)}
+    .spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .search{position:relative;margin-bottom:14px}
+    .search input{width:100%;font-family:inherit;font-size:15px;padding:13px 13px 13px 40px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+    .search input:focus{outline:none;border-color:var(--pine-soft)}
+    .search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted)}
+
+    .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+    .filters button{flex:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+    .filters button.active{color:#fff;background:var(--pine);border-color:var(--pine)}
+
+    .rep{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px;box-shadow:0 4px 14px rgba(15,61,56,.05)}
+    .rep-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+    .ticket{font-size:15px;font-weight:800;letter-spacing:.5px;color:var(--pine)}
+    .badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:4px 10px}
+    .b-received{background:#EAEFF6;color:#3A5A86}
+    .b-atFactory{background:#FBF1DE;color:var(--honey-deep)}
+    .b-ready{background:#E7F4EC;color:var(--ok)}
+    .b-collected{background:#EEF1F0;color:var(--muted)}
+    .b-paid{background:#F1EAF4;color:#6A4A86;margin-left:6px}
+
+    .rep-body{display:flex;gap:12px}
+    .rep-body img,.rep-body .nopic{width:62px;height:62px;border-radius:10px;object-fit:cover;flex:none;background:var(--field)}
+    .rep-body .nopic{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)}
+    .rep-cust{font-size:14.5px;font-weight:700}
+    .rep-phone{font-size:12.5px;color:var(--muted);margin-top:2px}
+    .rep-desc{font-size:13px;margin-top:6px}
+    .rep-issue{font-size:12.5px;color:var(--ink);background:var(--field);border-radius:8px;padding:7px 9px;margin-top:9px}
+
+    .rep-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line);flex-wrap:wrap}
+    .stamp{font-size:11px;color:var(--muted);line-height:1.45}
+    .actions{display:flex;gap:7px;flex-wrap:wrap}
+    .act{font-family:inherit;font-size:12px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:9px;padding:9px 12px;cursor:pointer}
+    .act:hover{background:#0c322e}
+    .act.ghost{color:var(--pine);background:#fff;border:1.5px solid var(--line)}
+    .act.ghost:hover{background:var(--field)}
+    .act.wa{background:#25D366}
+    .act.wa:hover{background:#1eb358}
+
+    .state{text-align:center;padding:44px 20px;color:var(--muted)}
+    .state h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+    .state p{font-size:13.5px}
+
+    .gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .gate p{color:var(--muted)}
+
+    /* ---- batch selection ---- */
+    .rep-check{position:relative;display:flex;align-items:center;cursor:pointer}
+    .rep-check input{position:absolute;opacity:0;width:0;height:0}
+    .rep-check span{width:22px;height:22px;border:2px solid var(--line);border-radius:6px;display:block;background:#fff;transition:.15s}
+    .rep-check input:checked + span{background:var(--pine);border-color:var(--pine)}
+    .rep-check input:checked + span:after{content:"";position:absolute;left:8px;top:3px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+    .batch-hint{font-size:12.5px;color:var(--muted);background:#fff;border:1px dashed var(--line);border-radius:10px;padding:9px 12px;margin-bottom:12px}
+    .batch-group{margin-bottom:18px}
+    .batch-head{font-size:12.5px;font-weight:700;color:var(--honey-deep);background:#FBF1DE;border-radius:8px;padding:8px 12px;margin-bottom:10px}
+    .batch-bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.08);padding:12px 16px;display:none;align-items:center;justify-content:space-between;gap:12px}
+    .batch-bar.show{display:flex}
+    .batch-bar #batchCount{font-size:14px;font-weight:700}
+    .batch-bar button{font-family:inherit;font-size:14px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:11px;padding:12px 20px;cursor:pointer}
+    .batch-bar button:hover{background:#0c322e}
+    .batch-bar button:disabled{background:var(--muted)}
+
+    /* ---- printable slip ---- */
+    #printArea{display:none}
+    @media print{
+      body{background:#fff}
+      body > *:not(#printArea){display:none !important}
+      #printArea{display:block !important;padding:0;margin:0}
+      .slip{max-width:300px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;color:#000}
+    }
+    .slip{padding:14px}
+    .slip .sh{text-align:center;border-bottom:2px dashed #999;padding-bottom:10px;margin-bottom:10px}
+    .slip .sh h2{font-size:18px;font-weight:800}
+    .slip .sh p{font-size:11px;color:#444}
+    .slip .rc{text-align:center;font-size:12px;letter-spacing:2px;color:#444;margin-bottom:6px}
+    .slip .tk{text-align:center;font-size:30px;font-weight:800;letter-spacing:2px;margin-bottom:12px}
+    .slip .line{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;gap:10px}
+    .slip .line .k{color:#555;font-weight:600}
+    .slip .line .v{text-align:right;font-weight:700}
+    .slip .note{border-top:2px dashed #999;margin-top:12px;padding-top:10px;text-align:center;font-size:11px;color:#444}
+    @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+  </style>
+</head>
+<body>
+  <div id="app" style="display:none">
+    <div class="topbar">
+      <a class="back" href="home.html" aria-label="Home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <div class="title"><h1>Repairs</h1><span>Isuru Bag Center</span></div>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+
+    <div class="page">
+      <button class="newbtn" id="toggleNew">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        New repair
+      </button>
+
+      <!-- intake form -->
+      <div class="form-card" id="formCard">
+        <h2>New repair intake</h2>
+        <div class="form-msg" id="formMsg"></div>
+
+        <input type="file" id="photoInput" accept="image/*" style="display:none" />
+        <div class="photo-pick" id="photoPick">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <p>Photo of the damaged bag</p>
+          <p class="hint">Take a photo or choose from gallery</p>
+        </div>
+
+        <div class="row2">
+          <div><label class="lbl" for="custName">Customer name</label><input class="inp" id="custName" type="text" placeholder="e.g. Nimal Perera"></div>
+          <div><label class="lbl" for="custPhone">Phone</label><input class="inp" id="custPhone" type="tel" inputmode="tel" placeholder="07X XXX XXXX"></div>
+        </div>
+
+        <label class="lbl" for="bagDesc">Bag description</label>
+        <input class="inp" id="bagDesc" type="text" placeholder="e.g. Black school bag, two zips">
+
+        <label class="lbl" for="issueDesc">What needs repair?</label>
+        <textarea class="inp" id="issueDesc" placeholder="e.g. Broken zip, torn strap"></textarea>
+
+        <div class="toggle-row">
+          <label for="paidToggle">Paid repair?</label>
+          <span class="switch"><input type="checkbox" id="paidToggle"><span class="slider"></span></span>
+        </div>
+        <div id="amountWrap" style="display:none">
+          <label class="lbl" for="amountInput">Amount (Rs.)</label>
+          <input class="inp" id="amountInput" type="number" min="0" placeholder="e.g. 500">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" id="saveBtn"><span class="spinner" id="saveSpinner"></span><span id="saveText">Create repair ticket</span></button>
+          <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="text" placeholder="Search ticket, name or phone…">
+      </div>
+
+      <div class="filters">
+        <button data-f="active" class="active">In progress</button>
+        <button data-f="received">Received</button>
+        <button data-f="atFactory">At factory</button>
+        <button data-f="ready">Ready</button>
+        <button data-f="collected">Collected</button>
+        <button data-f="all">All</button>
+      </div>
+
+      <div id="listWrap"><div class="state"><p>Loading…</p></div></div>
+    </div>
+
+    <div class="batch-bar" id="batchBar">
+      <span id="batchCount">0 selected</span>
+      <button id="batchSend">Send to factory</button>
+    </div>
+  </div>
+
+  <div class="gate" id="gate" style="display:none"><p>Taking you to sign in…</p></div>
+
+  <!-- printable slip target (direct child of body) -->
+  <div id="printArea"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc, runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02",
+      measurementId: "G-6ZW4E68EL4"
+    };
+    const IMGBB_KEY = "a476eb7ccf99b450d620f344d1f65853";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let repairs = [];
+    let currentFilter = 'active';
+    let selectedFile = null;
+    let selectedIds = new Set();   // bags ticked for a factory batch
+
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        currentUser = user;
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('gate').style.display = 'none';
+        loadRepairs();
+      }else{
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('gate').style.display = 'flex';
+        window.location.href = 'index.html';
+      }
+    });
+    document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth).then(()=>window.location.href='index.html'));
+
+    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmt(ts){ if(!ts||!ts.toDate) return ''; const d=ts.toDate(); return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }
+    function today(){ return new Date().toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }
+    function todayISO(){ return new Date().toISOString().slice(0,10); }
+    function niceDate(iso){ const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}); }
+
+    // form
+    const formCard = document.getElementById('formCard');
+    document.getElementById('toggleNew').addEventListener('click', ()=>{ formCard.classList.toggle('open'); if(formCard.classList.contains('open')) formCard.scrollIntoView({behavior:'smooth'}); });
+    document.getElementById('cancelBtn').addEventListener('click', resetForm);
+
+    document.getElementById('paidToggle').addEventListener('change', e=>{
+      document.getElementById('amountWrap').style.display = e.target.checked ? 'block':'none';
+    });
+
+    // photo
+    const photoInput=document.getElementById('photoInput'), photoPick=document.getElementById('photoPick');
+    photoPick.addEventListener('click', ()=>photoInput.click());
+    photoInput.addEventListener('change', ()=>{
+      const f=photoInput.files[0]; if(!f) return; selectedFile=f;
+      const r=new FileReader(); r.onload=e=>{ photoPick.innerHTML=`<img src="${e.target.result}" alt=""><p class="hint" style="margin-top:8px">Tap to change photo</p>`; }; r.readAsDataURL(f);
+    });
+    function compressImage(file,maxW=1000,q=0.8){return new Promise((res,rej)=>{const img=new Image(),reader=new FileReader();reader.onload=e=>img.src=e.target.result;reader.onerror=rej;img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>b?res(b):rej(new Error('compress')),'image/jpeg',q);};img.onerror=rej;reader.readAsDataURL(file);});}
+    async function uploadPhoto(file){const blob=await compressImage(file);const fd=new FormData();fd.append('image',blob,'bag.jpg');const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:fd});const j=await r.json();if(!j.success)throw new Error('Photo upload failed');return j.data.url;}
+
+    // next ticket number (safe against two staff at once)
+    async function nextTicketId(){
+      const n = await runTransaction(db, async (tx)=>{
+        const ref = doc(db,'counters','repairs');
+        const snap = await tx.get(ref);
+        const cur = snap.exists() ? (snap.data().value||0) : 0;
+        const next = cur + 1;
+        tx.set(ref, { value: next }, { merge:true });
+        return next;
+      });
+      return 'R-' + String(n).padStart(4,'0');
+    }
+
+    const saveBtn=document.getElementById('saveBtn'),saveSpinner=document.getElementById('saveSpinner'),saveText=document.getElementById('saveText'),formMsg=document.getElementById('formMsg');
+    function showFormError(t){formMsg.textContent=t;formMsg.style.display='block';}
+    function setSaving(on,label){saveBtn.disabled=on;saveSpinner.style.display=on?'block':'none';saveText.textContent=on?(label||'Saving…'):'Create repair ticket';}
+
+    saveBtn.addEventListener('click', async ()=>{
+      formMsg.style.display='none';
+      const name=document.getElementById('custName').value.trim();
+      const phone=document.getElementById('custPhone').value.trim();
+      const desc=document.getElementById('bagDesc').value.trim();
+      const issue=document.getElementById('issueDesc').value.trim();
+      const isPaid=document.getElementById('paidToggle').checked;
+      const amount=document.getElementById('amountInput').value.trim();
+
+      if(!name){ showFormError('Please enter the customer name.'); return; }
+      if(!phone){ showFormError('Please enter the customer phone number.'); return; }
+
+      try{
+        setSaving(true, selectedFile?'Uploading photo…':'Creating ticket…');
+        let damagePhoto='';
+        if(selectedFile){ damagePhoto = await uploadPhoto(selectedFile); }
+        setSaving(true,'Creating ticket…');
+        const ticketId = await nextTicketId();
+
+        await addDoc(collection(db,'repairs'),{
+          ticketId, customerName:name, customerPhone:phone,
+          bagDescription:desc, issue, damagePhoto,
+          isPaid, amount: isPaid && amount ? Number(amount) : null,
+          status:'received',
+          receivedBy: currentUser.email, receivedAt: serverTimestamp()
+        });
+
+        resetForm();
+        await loadRepairs();
+        // offer to print the slip right away
+        const justMade = repairs.find(r=>r.ticketId===ticketId);
+        if(justMade) printSlip(justMade);
+      }catch(e){ showFormError(e.message||'Could not save. Please try again.'); }
+      finally{ setSaving(false); }
+    });
+
+    function resetForm(){
+      ['custName','custPhone','bagDesc','issueDesc','amountInput'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('paidToggle').checked=false;
+      document.getElementById('amountWrap').style.display='none';
+      selectedFile=null; photoInput.value='';
+      photoPick.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg><p>Photo of the damaged bag</p><p class="hint">Take a photo or choose from gallery</p>`;
+      formMsg.style.display='none'; formCard.classList.remove('open');
+    }
+
+    // load + render
+    async function loadRepairs(){
+      try{
+        const snap = await getDocs(query(collection(db,'repairs'), orderBy('receivedAt','desc')));
+        repairs = snap.docs.map(d=>({id:d.id, ...d.data()}));
+        renderList();
+      }catch(e){ document.getElementById('listWrap').innerHTML=`<div class="state"><h3>Couldn’t load</h3><p>${escapeHtml(e.message)}</p></div>`; }
+    }
+
+    document.querySelectorAll('.filters button').forEach(b=> b.addEventListener('click', ()=>{
+      document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); currentFilter=b.dataset.f; renderList();
+    }));
+    document.getElementById('searchInput').addEventListener('input', renderList);
+
+    const STATUS_LABEL={received:'Received',atFactory:'At factory',ready:'Ready for pickup',collected:'Collected'};
+    const NEXT={received:'atFactory',atFactory:'ready',ready:'collected'};
+    const NEXT_LABEL={received:'Send to factory',atFactory:'Mark ready',ready:'Mark collected'};
+
+    function buildCard(r, withCheckbox){
+      const img=r.damagePhoto?`<img src="${r.damagePhoto}" alt="">`:`<span class="nopic">No photo</span>`;
+      const paid=r.isPaid?`<span class="badge b-paid">Paid${r.amount?` Rs.${r.amount}`:''}</span>`:'';
+      const issue=r.issue?`<div class="rep-issue">${escapeHtml(r.issue)}</div>`:'';
+
+      let stamp=`Received by ${escapeHtml((r.receivedBy||'').split('@')[0])} · ${fmt(r.receivedAt)}`;
+      if(r.status==='collected'&&r.collectedBy) stamp=`Collected by ${escapeHtml(r.collectedBy.split('@')[0])} · ${fmt(r.collectedAt)}`;
+      else if(r.status==='ready'&&r.readyBy) stamp=`Ready · marked by ${escapeHtml(r.readyBy.split('@')[0])} · ${fmt(r.readyAt)}`;
+      else if(r.status==='atFactory'&&r.sentBy) stamp=`At factory · sent by ${escapeHtml(r.sentBy.split('@')[0])} · ${fmt(r.sentAt)}`;
+
+      const next=NEXT[r.status];
+      let acts=`<button class="act ghost" data-print="${r.id}">Print slip</button>`;
+      if(r.status==='ready') acts+=`<button class="act wa" data-wa="${r.id}">Message customer</button>`;
+      if(next) acts+=`<button class="act" data-id="${r.id}" data-next="${next}">${NEXT_LABEL[r.status]}</button>`;
+
+      const check = withCheckbox
+        ? `<label class="rep-check"><input type="checkbox" data-sel="${r.id}" ${selectedIds.has(r.id)?'checked':''}><span></span></label>`
+        : '';
+
+      return `<div class="rep">
+        <div class="rep-head"><span style="display:flex;align-items:center;gap:9px">${check}<span class="ticket">${escapeHtml(r.ticketId||'—')}</span></span><span><span class="badge b-${r.status}">${STATUS_LABEL[r.status]}</span>${paid}</span></div>
+        <div class="rep-body">
+          ${img}
+          <div style="flex:1;min-width:0">
+            <div class="rep-cust">${escapeHtml(r.customerName)}</div>
+            <div class="rep-phone">${escapeHtml(r.customerPhone)}</div>
+            ${r.bagDescription?`<div class="rep-desc">${escapeHtml(r.bagDescription)}</div>`:''}
+          </div>
+        </div>
+        ${issue}
+        <div class="rep-foot"><span class="stamp">${stamp}</span><div class="actions">${acts}</div></div>
+      </div>`;
+    }
+
+    function wireCardEvents(wrap){
+      wrap.querySelectorAll('.act[data-next]').forEach(b=> b.addEventListener('click', ()=>{
+        const id=b.dataset.id, next=b.dataset.next;
+        if(next==='collected'){ if(!confirm('Confirm this bag was handed to the customer?')) return; }
+        advance(id,next);
+      }));
+      wrap.querySelectorAll('.act[data-print]').forEach(b=> b.addEventListener('click', ()=>{
+        const r=repairs.find(x=>x.id===b.dataset.print); if(r) printSlip(r);
+      }));
+      wrap.querySelectorAll('.act[data-wa]').forEach(b=> b.addEventListener('click', ()=>{
+        const r=repairs.find(x=>x.id===b.dataset.wa); if(r) messageCustomer(r);
+      }));
+      wrap.querySelectorAll('input[data-sel]').forEach(cb=> cb.addEventListener('change', ()=>{
+        const id=cb.dataset.sel;
+        if(cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+        updateBatchBar();
+      }));
+    }
+
+    function renderList(){
+      const wrap=document.getElementById('listWrap');
+      const term=document.getElementById('searchInput').value.trim().toLowerCase();
+      let list=repairs;
+      if(currentFilter==='active') list=repairs.filter(r=>r.status!=='collected');
+      else if(currentFilter!=='all') list=repairs.filter(r=>r.status===currentFilter);
+      if(term) list=list.filter(r=>
+        (r.ticketId||'').toLowerCase().includes(term) ||
+        (r.customerName||'').toLowerCase().includes(term) ||
+        (r.customerPhone||'').toLowerCase().includes(term));
+
+      // selections only make sense on the Received view
+      if(currentFilter!=='received') selectedIds.clear();
+
+      if(list.length===0){ wrap.innerHTML=`<div class="state"><h3>Nothing here</h3><p>No repairs to show.</p></div>`; updateBatchBar(); return; }
+
+      if(currentFilter==='atFactory'){
+        // group bags by the day they were sent
+        const groups={};
+        list.forEach(r=>{ const k=r.batchDate||'unknown'; (groups[k]=groups[k]||[]).push(r); });
+        const keys=Object.keys(groups).sort().reverse();
+        wrap.innerHTML=keys.map(k=>{
+          const cards=groups[k].map(r=>buildCard(r,false)).join('');
+          const label = k==='unknown' ? 'Sent (no date)' : 'Sent ' + niceDate(k);
+          const n=groups[k].length;
+          return `<div class="batch-group"><div class="batch-head">${label} · ${n} bag${n>1?'s':''}</div>${cards}</div>`;
+        }).join('');
+      } else {
+        const withChecks = (currentFilter==='received');
+        const hint = withChecks ? `<div class="batch-hint">Tick the bags going to the factory today, then tap “Send to factory”.</div>` : '';
+        wrap.innerHTML = hint + list.map(r=>buildCard(r, withChecks && r.status==='received')).join('');
+      }
+
+      wireCardEvents(wrap);
+      updateBatchBar();
+    }
+
+    // ---- batch send to factory ----
+    function updateBatchBar(){
+      const bar=document.getElementById('batchBar');
+      if(currentFilter==='received' && selectedIds.size>0){
+        bar.classList.add('show');
+        document.getElementById('batchCount').textContent = `${selectedIds.size} bag${selectedIds.size>1?'s':''} selected`;
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+    document.getElementById('batchSend').addEventListener('click', async ()=>{
+      if(selectedIds.size===0) return;
+      const ids=[...selectedIds];
+      const btn=document.getElementById('batchSend');
+      btn.disabled=true; btn.textContent='Sending…';
+      try{
+        const now=serverTimestamp(); const bd=todayISO();
+        await Promise.all(ids.map(id=> updateDoc(doc(db,'repairs',id),{
+          status:'atFactory', sentBy:currentUser.email, sentAt:now, batchDate:bd
+        })));
+        selectedIds.clear();
+        await loadRepairs();
+      }catch(e){ alert('Could not send batch: '+e.message); }
+      finally{ btn.disabled=false; btn.textContent='Send to factory'; }
+    });
+
+    async function advance(id,next){
+      const now=serverTimestamp(); const patch={status:next};
+      if(next==='atFactory'){ patch.sentBy=currentUser.email; patch.sentAt=now; patch.batchDate=todayISO(); }
+      if(next==='ready'){ patch.readyBy=currentUser.email; patch.readyAt=now; }
+      if(next==='collected'){ patch.collectedBy=currentUser.email; patch.collectedAt=now; }
+      try{ await updateDoc(doc(db,'repairs',id), patch); await loadRepairs(); }
+      catch(e){ alert('Could not update: '+e.message); }
+    }
+
+    // WhatsApp: opens chat with a ready-made message (staff taps send)
+    function waNumber(phone){
+      let p=(phone||'').replace(/\D/g,'');
+      if(p.startsWith('0')) p='94'+p.slice(1);
+      else if(p.length===9) p='94'+p;
+      return p;
+    }
+    function messageCustomer(r){
+      const msg=`Hello ${r.customerName}, your bag repair (${r.ticketId}) at Isuru Bag Center is ready for pickup. Please bring your repair slip. Thank you!`;
+      const url=`https://wa.me/${waNumber(r.customerPhone)}?text=${encodeURIComponent(msg)}`;
+      window.open(url,'_blank');
+    }
+
+    // print slip
+    function printSlip(r){
+      const paidLine = r.isPaid ? `<div class="line"><span class="k">Repair charge</span><span class="v">Rs. ${r.amount||'—'}</span></div>` : '';
+      document.getElementById('printArea').innerHTML = `
+        <div class="slip">
+          <div class="sh"><h2>Isuru Bag Center</h2><p>Bag Repair Receipt</p></div>
+          <div class="rc">REPAIR TICKET</div>
+          <div class="tk">${escapeHtml(r.ticketId||'')}</div>
+          <div class="line"><span class="k">Date</span><span class="v">${today()}</span></div>
+          <div class="line"><span class="k">Customer</span><span class="v">${escapeHtml(r.customerName)}</span></div>
+          <div class="line"><span class="k">Phone</span><span class="v">${escapeHtml(r.customerPhone)}</span></div>
+          <div class="line"><span class="k">Bag</span><span class="v">${escapeHtml(r.bagDescription||'—')}</span></div>
+          <div class="line"><span class="k">Repair</span><span class="v">${escapeHtml(r.issue||'—')}</span></div>
+          ${paidLine}
+          <div class="note">Please present this slip to collect your bag.<br>We will notify you when it is ready.</div>
+        </div>`;
+      window.print();
+    }
+  </script>
+</body>
+</html>

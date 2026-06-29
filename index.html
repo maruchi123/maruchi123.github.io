@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F3D38" />
+  <title>Isuru Bag Center — Sign in</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --pine:#0F3D38;        /* deep brand teal */
+      --pine-deep:#0A2C28;   /* darker teal for gradient */
+      --pine-soft:#1C5A53;   /* lighter teal */
+      --honey:#E0A340;       /* warm amber accent */
+      --honey-deep:#C8862A;
+      --ink:#12211F;         /* near-black text */
+      --muted:#6B7C79;       /* muted grey-green */
+      --line:#E4E8E6;        /* hairline */
+      --card:#FFFFFF;
+      --field:#F5F7F6;
+      --danger:#B23B3B;
+      --danger-bg:#FBEDED;
+      --ok:#1E7A52;
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+      color:var(--ink);
+      background:linear-gradient(160deg,var(--pine) 0%,var(--pine-deep) 100%);
+      min-height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .wrap{width:100%;max-width:400px}
+
+    /* Brand header */
+    .brand{
+      text-align:center;
+      margin-bottom:22px;
+      color:#fff;
+    }
+    .badge{
+      width:64px;height:64px;border-radius:18px;
+      margin:0 auto 16px;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(150deg,var(--honey),var(--honey-deep));
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+    .badge svg{width:34px;height:34px}
+    .brand h1{
+      font-size:22px;font-weight:800;letter-spacing:-.3px;
+      line-height:1.2;
+    }
+    .brand p{
+      margin-top:6px;font-size:13.5px;font-weight:500;
+      color:rgba(255,255,255,.72);
+    }
+
+    /* Card */
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:26px 22px 24px;
+      box-shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+    .card h2{
+      font-size:18px;font-weight:700;letter-spacing:-.2px;
+      margin-bottom:4px;
+    }
+    .card .sub{
+      font-size:13.5px;color:var(--muted);margin-bottom:20px;
+    }
+
+    .field{margin-bottom:14px}
+    .field label{
+      display:block;font-size:12.5px;font-weight:600;
+      color:var(--ink);margin-bottom:7px;
+    }
+    .field input{
+      width:100%;
+      font-family:inherit;font-size:16px;
+      padding:14px 14px;
+      border:1.5px solid var(--line);
+      border-radius:12px;
+      background:var(--field);
+      color:var(--ink);
+      transition:border-color .15s, background .15s;
+    }
+    .field input::placeholder{color:#9DABA8}
+    .field input:focus{
+      outline:none;
+      border-color:var(--pine-soft);
+      background:#fff;
+      box-shadow:0 0 0 3px rgba(28,90,83,.12);
+    }
+
+    .btn{
+      width:100%;
+      font-family:inherit;font-size:15.5px;font-weight:700;
+      color:#fff;
+      background:var(--pine);
+      border:none;border-radius:12px;
+      padding:15px;
+      cursor:pointer;
+      margin-top:6px;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      transition:background .15s, transform .05s;
+      min-height:50px;
+    }
+    .btn:hover{background:#0c322e}
+    .btn:active{transform:scale(.99)}
+    .btn:disabled{background:var(--muted);cursor:default}
+
+    .spinner{
+      width:18px;height:18px;border-radius:50%;
+      border:2.5px solid rgba(255,255,255,.35);
+      border-top-color:#fff;
+      animation:spin .7s linear infinite;
+      display:none;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Error message */
+    .msg{
+      display:none;
+      font-size:13px;font-weight:500;
+      padding:11px 13px;border-radius:10px;
+      margin-bottom:16px;
+      background:var(--danger-bg);color:var(--danger);
+      border:1px solid #F3D6D6;
+    }
+
+    .foot{
+      text-align:center;margin-top:18px;
+      font-size:12px;color:rgba(255,255,255,.55);
+    }
+
+    /* Success / logged-in panel */
+    .welcome{display:none;text-align:center}
+    .welcome .tick{
+      width:58px;height:58px;border-radius:50%;
+      background:#E7F4EC;color:var(--ok);
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 16px;
+    }
+    .welcome .tick svg{width:30px;height:30px}
+    .welcome h2{font-size:19px;font-weight:700;margin-bottom:6px}
+    .welcome .who{
+      font-size:14px;color:var(--muted);margin-bottom:22px;
+      word-break:break-all;
+    }
+    .btn-ghost{
+      width:100%;font-family:inherit;font-size:14.5px;font-weight:600;
+      color:var(--pine);background:#fff;
+      border:1.5px solid var(--line);border-radius:12px;
+      padding:13px;cursor:pointer;min-height:48px;
+    }
+    .btn-ghost:hover{background:var(--field)}
+
+    @media (prefers-reduced-motion:reduce){
+      .spinner{animation:none}
+      .btn:active{transform:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="brand">
+      <div class="badge" aria-hidden="true">
+        <!-- simple bag mark -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 8h14l-1 12H6L5 8Z" fill="#fff"/>
+          <path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="#C8862A" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>Isuru Bag Center</h1>
+      <p>Staff operations</p>
+    </div>
+
+    <div class="card">
+
+      <!-- LOGIN VIEW -->
+      <div id="loginView">
+        <h2>Sign in</h2>
+        <p class="sub">Use the email and password your manager gave you.</p>
+
+        <div class="msg" id="errMsg"></div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" inputmode="email" autocomplete="username"
+                 placeholder="name@example.com" />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password"
+                 placeholder="Your password" />
+        </div>
+
+        <button class="btn" id="loginBtn">
+          <span class="spinner" id="spinner"></span>
+          <span id="btnText">Sign in</span>
+        </button>
+      </div>
+
+      <!-- LOGGED-IN VIEW (placeholder until dashboard is built) -->
+      <div class="welcome" id="welcomeView">
+        <div class="tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h2>You're signed in</h2>
+        <p class="who" id="whoLabel"></p>
+        <a class="btn" href="catalog.html" style="text-decoration:none;margin-bottom:10px">Open Catalog</a>
+        <button class="btn-ghost" id="logoutBtn">Sign out</button>
+      </div>
+
+    </div>
+
+    <p class="foot">Isuru Bag Center · Internal app</p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // ---- Your Firebase project (safe to keep in the page) ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02",
+      measurementId: "G-6ZW4E68EL4"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ---- Elements ----
+    const loginView   = document.getElementById('loginView');
+    const welcomeView = document.getElementById('welcomeView');
+    const emailEl     = document.getElementById('email');
+    const passEl      = document.getElementById('password');
+    const loginBtn    = document.getElementById('loginBtn');
+    const btnText     = document.getElementById('btnText');
+    const spinner     = document.getElementById('spinner');
+    const errMsg      = document.getElementById('errMsg');
+    const whoLabel    = document.getElementById('whoLabel');
+    const logoutBtn   = document.getElementById('logoutBtn');
+
+    function showError(text){
+      errMsg.textContent = text;
+      errMsg.style.display = 'block';
+    }
+    function clearError(){ errMsg.style.display = 'none'; }
+
+    function setLoading(on){
+      loginBtn.disabled = on;
+      spinner.style.display = on ? 'block' : 'none';
+      btnText.textContent = on ? 'Signing in…' : 'Sign in';
+    }
+
+    // Friendly messages for the common cases
+    function friendly(code){
+      switch(code){
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+          return 'Email or password is incorrect. Please try again.';
+        case 'auth/invalid-email':
+          return 'That doesn’t look like a valid email address.';
+        case 'auth/too-many-requests':
+          return 'Too many attempts. Please wait a moment and try again.';
+        case 'auth/network-request-failed':
+          return 'No internet connection. Check your network and retry.';
+        default:
+          return 'Could not sign in. Please try again.';
+      }
+    }
+
+    async function doLogin(){
+      clearError();
+      const email = emailEl.value.trim();
+      const pass  = passEl.value;
+      if(!email || !pass){
+        showError('Please enter both your email and password.');
+        return;
+      }
+      setLoading(true);
+      try{
+        await signInWithEmailAndPassword(auth, email, pass);
+        // onAuthStateChanged below handles the screen switch
+      }catch(err){
+        showError(friendly(err.code));
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    loginBtn.addEventListener('click', doLogin);
+    passEl.addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+    emailEl.addEventListener('keydown', e => { if(e.key === 'Enter') passEl.focus(); });
+
+    logoutBtn.addEventListener('click', () => signOut(auth));
+
+    // Reacts whenever login state changes (login, logout, page reload)
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        // Signed in → go to the app's home screen
+        window.location.href = 'home.html';
+      }else{
+        welcomeView.style.display = 'none';
+        loginView.style.display   = 'block';
+        passEl.value = '';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F3D38" />
+  <title>Suggestions · Isuru Bag Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pine:#0F3D38; --pine-deep:#0A2C28; --pine-soft:#1C5A53;
+      --honey:#E0A340; --honey-deep:#C8862A;
+      --ink:#12211F; --muted:#6B7C79; --line:#E4E8E6;
+      --card:#FFF; --field:#F5F7F6; --bg:#F1F4F2;
+      --danger:#B23B3B; --danger-bg:#FBEDED; --ok:#1E7A52;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased}
+
+    .topbar{position:sticky;top:0;z-index:20;background:var(--pine);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+    .topbar a.back{color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14)}
+    .topbar a.back:hover{background:rgba(255,255,255,.22)}
+    .topbar a.back svg{width:18px;height:18px}
+    .topbar .title{flex:1;min-width:0}
+    .topbar .title h1{font-size:16px;font-weight:700;line-height:1.1}
+    .topbar .title span{font-size:11.5px;color:rgba(255,255,255,.65)}
+    .topbar button{font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:none;border-radius:9px;padding:8px 11px;cursor:pointer}
+    .topbar button:hover{background:rgba(255,255,255,.22)}
+
+    .page{max-width:680px;margin:0 auto;padding:16px}
+
+    .newbtn{width:100%;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
+    .newbtn:hover{background:#0c322e}
+    .newbtn svg{width:18px;height:18px}
+
+    .form-card{display:none;background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:18px;border:1px solid var(--line);box-shadow:0 6px 20px rgba(15,61,56,.06)}
+    .form-card.open{display:block}
+    .form-card h2{font-size:16px;font-weight:700;margin-bottom:16px}
+    .form-msg{display:none;font-size:13px;font-weight:500;padding:10px 12px;border-radius:10px;margin-bottom:14px;background:var(--danger-bg);color:var(--danger);border:1px solid #F3D6D6}
+
+    .photo-pick{border:2px dashed var(--line);border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:var(--field);margin-bottom:16px}
+    .photo-pick:hover{border-color:var(--pine-soft)}
+    .photo-pick svg{width:28px;height:28px;color:var(--muted);margin-bottom:6px}
+    .photo-pick p{font-size:13px;color:var(--muted);font-weight:500}
+    .photo-pick .hint{font-size:11px;margin-top:2px}
+    .photo-pick img{max-width:100%;max-height:220px;border-radius:10px;display:block;margin:0 auto}
+
+    .lbl{display:block;font-size:12.5px;font-weight:600;margin-bottom:7px}
+    .inp{width:100%;font-family:inherit;font-size:15px;padding:12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);margin-bottom:14px}
+    .inp:focus{outline:none;border-color:var(--pine-soft);box-shadow:0 0 0 3px rgba(28,90,83,.10)}
+    textarea.inp{resize:vertical;min-height:72px}
+
+    .form-actions{display:flex;gap:10px;margin-top:4px}
+    .btn-primary{flex:1;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;min-height:50px}
+    .btn-primary:hover{background:#0c322e}
+    .btn-primary:disabled{background:var(--muted);cursor:default}
+    .btn-cancel{flex:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer}
+    .btn-cancel:hover{background:var(--field)}
+    .spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .filters{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+    .filters button{flex:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+    .filters button.active{color:#fff;background:var(--pine);border-color:var(--pine)}
+
+    .sug{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 4px 14px rgba(15,61,56,.05)}
+    .sug-photo{width:100%;max-height:260px;object-fit:cover;display:block;background:var(--field)}
+    .sug-body{padding:14px}
+    .sug-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+    .badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:20px;padding:4px 10px;flex:none}
+    .b-submitted{background:#EAEFF6;color:#3A5A86}
+    .b-underReview{background:#FBF1DE;color:var(--honey-deep)}
+    .b-approved{background:#E7F4EC;color:var(--ok)}
+    .b-ordered{background:#E5EFEC;color:var(--pine)}
+    .b-rejected{background:#F2E9E9;color:var(--danger)}
+    .sug-desc{font-size:14.5px;line-height:1.5;white-space:pre-wrap}
+    .sug-by{font-size:11.5px;color:var(--muted);margin-top:9px}
+
+    .sug-comment{font-size:13px;background:var(--field);border-radius:10px;padding:10px 12px;margin-top:11px}
+    .sug-comment .ct{font-size:10.5px;font-weight:700;color:var(--honey-deep);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+
+    .sug-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+    .vote{display:flex;align-items:center;gap:7px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--pine);background:#fff;border:1.5px solid var(--line);border-radius:30px;padding:8px 14px;cursor:pointer}
+    .vote:hover{background:var(--field)}
+    .vote.voted{background:#E5EFEC;border-color:#BFDCD4}
+    .vote svg{width:16px;height:16px}
+    .manage-btn{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline}
+
+    .manage{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+    .manage.open{display:block}
+    .manage .ml{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+    .status-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+    .status-row button{font-family:inherit;font-size:12px;font-weight:700;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 12px;cursor:pointer}
+    .status-row button.on{color:#fff;background:var(--pine);border-color:var(--pine)}
+    .manage textarea{width:100%;font-family:inherit;font-size:14px;padding:11px;border:1.5px solid var(--line);border-radius:10px;min-height:56px;resize:vertical;margin-bottom:10px}
+    .manage textarea:focus{outline:none;border-color:var(--pine-soft)}
+    .save-comment{font-family:inherit;font-size:13px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:10px;padding:10px 16px;cursor:pointer}
+    .save-comment:hover{background:#0c322e}
+
+    .state{text-align:center;padding:44px 20px;color:var(--muted)}
+    .state h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+    .state p{font-size:13.5px}
+
+    .gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .gate p{color:var(--muted)}
+    @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+  </style>
+</head>
+<body>
+  <div id="app" style="display:none">
+    <div class="topbar">
+      <a class="back" href="home.html" aria-label="Home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <div class="title"><h1>Suggestions</h1><span>Isuru Bag Center</span></div>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+
+    <div class="page">
+      <button class="newbtn" id="toggleNew">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Share an idea
+      </button>
+
+      <div class="form-card" id="formCard">
+        <h2>New suggestion</h2>
+        <div class="form-msg" id="formMsg"></div>
+
+        <input type="file" id="photoInput" accept="image/*" style="display:none" />
+        <div class="photo-pick" id="photoPick">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <p>Add a photo <span style="color:var(--muted)">(optional)</span></p>
+          <p class="hint">A design you saw, or a photo of the idea</p>
+        </div>
+
+        <label class="lbl" for="descInput">Your idea</label>
+        <textarea class="inp" id="descInput" placeholder="Describe the design or improvement you'd like to suggest…"></textarea>
+
+        <div class="form-actions">
+          <button class="btn-primary" id="saveBtn"><span class="spinner" id="saveSpinner"></span><span id="saveText">Submit suggestion</span></button>
+          <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <button data-f="all" class="active">All</button>
+        <button data-f="submitted">New</button>
+        <button data-f="underReview">Reviewing</button>
+        <button data-f="approved">Approved</button>
+        <button data-f="ordered">Ordered</button>
+        <button data-f="rejected">Rejected</button>
+      </div>
+
+      <div id="listWrap"><div class="state"><p>Loading…</p></div></div>
+    </div>
+  </div>
+
+  <div class="gate" id="gate" style="display:none"><p>Taking you to sign in…</p></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, doc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02",
+      measurementId: "G-6ZW4E68EL4"
+    };
+    const IMGBB_KEY = "a476eb7ccf99b450d620f344d1f65853";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let suggestions = [];
+    let currentFilter = 'all';
+    let selectedFile = null;
+
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        currentUser = user;
+        document.getElementById('app').style.display='block';
+        document.getElementById('gate').style.display='none';
+        loadSuggestions();
+      }else{
+        document.getElementById('app').style.display='none';
+        document.getElementById('gate').style.display='flex';
+        window.location.href='index.html';
+      }
+    });
+    document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth).then(()=>window.location.href='index.html'));
+
+    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function fmt(ts){ if(!ts||!ts.toDate) return ''; const d=ts.toDate(); return d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }
+
+    // form
+    const formCard=document.getElementById('formCard');
+    document.getElementById('toggleNew').addEventListener('click', ()=>{ formCard.classList.toggle('open'); if(formCard.classList.contains('open')) formCard.scrollIntoView({behavior:'smooth'}); });
+    document.getElementById('cancelBtn').addEventListener('click', resetForm);
+
+    const photoInput=document.getElementById('photoInput'), photoPick=document.getElementById('photoPick');
+    photoPick.addEventListener('click', ()=>photoInput.click());
+    photoInput.addEventListener('change', ()=>{
+      const f=photoInput.files[0]; if(!f) return; selectedFile=f;
+      const r=new FileReader(); r.onload=e=>{ photoPick.innerHTML=`<img src="${e.target.result}" alt=""><p class="hint" style="margin-top:8px">Tap to change photo</p>`; }; r.readAsDataURL(f);
+    });
+    function compressImage(file,maxW=1000,q=0.8){return new Promise((res,rej)=>{const img=new Image(),reader=new FileReader();reader.onload=e=>img.src=e.target.result;reader.onerror=rej;img.onload=()=>{let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>b?res(b):rej(new Error('compress')),'image/jpeg',q);};img.onerror=rej;reader.readAsDataURL(file);});}
+    async function uploadPhoto(file){const blob=await compressImage(file);const fd=new FormData();fd.append('image',blob,'idea.jpg');const r=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,{method:'POST',body:fd});const j=await r.json();if(!j.success)throw new Error('Photo upload failed');return j.data.url;}
+
+    const saveBtn=document.getElementById('saveBtn'),saveSpinner=document.getElementById('saveSpinner'),saveText=document.getElementById('saveText'),formMsg=document.getElementById('formMsg');
+    function showFormError(t){formMsg.textContent=t;formMsg.style.display='block';}
+    function setSaving(on,label){saveBtn.disabled=on;saveSpinner.style.display=on?'block':'none';saveText.textContent=on?(label||'Saving…'):'Submit suggestion';}
+
+    saveBtn.addEventListener('click', async ()=>{
+      formMsg.style.display='none';
+      const desc=document.getElementById('descInput').value.trim();
+      if(!desc){ showFormError('Please describe your idea.'); return; }
+      try{
+        setSaving(true, selectedFile?'Uploading photo…':'Submitting…');
+        let photoURL='';
+        if(selectedFile){ photoURL=await uploadPhoto(selectedFile); }
+        setSaving(true,'Submitting…');
+        await addDoc(collection(db,'suggestions'),{
+          description:desc, photoURL,
+          status:'submitted', managerComment:'',
+          voters: [], 
+          submittedBy: currentUser.email, submittedAt: serverTimestamp()
+        });
+        resetForm();
+        await loadSuggestions();
+      }catch(e){ showFormError(e.message||'Could not submit. Please try again.'); }
+      finally{ setSaving(false); }
+    });
+
+    function resetForm(){
+      document.getElementById('descInput').value='';
+      selectedFile=null; photoInput.value='';
+      photoPick.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg><p>Add a photo <span style="color:var(--muted)">(optional)</span></p><p class="hint">A design you saw, or a photo of the idea</p>`;
+      formMsg.style.display='none'; formCard.classList.remove('open');
+    }
+
+    // load
+    async function loadSuggestions(){
+      try{
+        const snap=await getDocs(query(collection(db,'suggestions'), orderBy('submittedAt','desc')));
+        suggestions=snap.docs.map(d=>({id:d.id, ...d.data()}));
+        // most-voted first, then newest
+        suggestions.sort((a,b)=> (votes(b)-votes(a)));
+        renderList();
+      }catch(e){ document.getElementById('listWrap').innerHTML=`<div class="state"><h3>Couldn’t load</h3><p>${escapeHtml(e.message)}</p></div>`; }
+    }
+    function votes(s){ return (s.voters||[]).length; }
+
+    document.querySelectorAll('.filters button').forEach(b=> b.addEventListener('click', ()=>{
+      document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); currentFilter=b.dataset.f; renderList();
+    }));
+
+    const STATUS_LABEL={submitted:'New',underReview:'Reviewing',approved:'Approved',ordered:'Ordered',rejected:'Rejected'};
+    const STATUSES=['submitted','underReview','approved','ordered','rejected'];
+
+    function renderList(){
+      const wrap=document.getElementById('listWrap');
+      let list = currentFilter==='all' ? suggestions : suggestions.filter(s=>s.status===currentFilter);
+      if(list.length===0){ wrap.innerHTML=`<div class="state"><h3>Nothing here</h3><p>${currentFilter==='all'?'No suggestions yet. Tap “Share an idea”.':'No suggestions in this status.'}</p></div>`; return; }
+
+      wrap.innerHTML=list.map(s=>{
+        const photo = s.photoURL ? `<img class="sug-photo" src="${s.photoURL}" alt="" loading="lazy">` : '';
+        const v = votes(s);
+        const youVoted = (s.voters||[]).includes(currentUser.email);
+        const comment = s.managerComment ? `<div class="sug-comment"><div class="ct">Manager note</div>${escapeHtml(s.managerComment)}</div>` : '';
+        const statusBtns = STATUSES.map(st=> `<button data-st="${st}" data-id="${s.id}" class="${s.status===st?'on':''}">${STATUS_LABEL[st]}</button>`).join('');
+        return `<div class="sug">
+          ${photo}
+          <div class="sug-body">
+            <div class="sug-head">
+              <span class="badge b-${s.status}">${STATUS_LABEL[s.status]}</span>
+            </div>
+            <div class="sug-desc">${escapeHtml(s.description)}</div>
+            <div class="sug-by">By ${escapeHtml((s.submittedBy||'').split('@')[0])} · ${fmt(s.submittedAt)}</div>
+            ${comment}
+            <div class="sug-foot">
+              <button class="vote ${youVoted?'voted':''}" data-vote="${s.id}">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M7 11v9M3 13v6a1 1 0 0 0 1 1h2V11H4a1 1 0 0 0-1 1Zm4 0 3.5-7.5A2 2 0 0 1 14 4l-.6 5H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                ${v}
+              </button>
+              <button class="manage-btn" data-manage="${s.id}">Manage</button>
+            </div>
+            <div class="manage" id="manage-${s.id}">
+              <div class="ml">Set status</div>
+              <div class="status-row">${statusBtns}</div>
+              <div class="ml">Manager note</div>
+              <textarea id="cmt-${s.id}" placeholder="Add a note for the team…">${escapeHtml(s.managerComment||'')}</textarea>
+              <button class="save-comment" data-savecmt="${s.id}">Save note</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      // votes
+      wrap.querySelectorAll('[data-vote]').forEach(b=> b.addEventListener('click', ()=> toggleVote(b.dataset.vote)));
+      // manage toggle
+      wrap.querySelectorAll('[data-manage]').forEach(b=> b.addEventListener('click', ()=> document.getElementById('manage-'+b.dataset.manage).classList.toggle('open')));
+      // status set
+      wrap.querySelectorAll('[data-st]').forEach(b=> b.addEventListener('click', ()=> setStatus(b.dataset.id, b.dataset.st)));
+      // save comment
+      wrap.querySelectorAll('[data-savecmt]').forEach(b=> b.addEventListener('click', ()=> saveComment(b.dataset.savecmt)));
+    }
+
+    async function toggleVote(id){
+      const s=suggestions.find(x=>x.id===id); if(!s) return;
+      const voters=new Set(s.voters||[]);
+      if(voters.has(currentUser.email)) voters.delete(currentUser.email); else voters.add(currentUser.email);
+      const arr=[...voters];
+      try{ await updateDoc(doc(db,'suggestions',id),{voters:arr}); s.voters=arr; suggestions.sort((a,b)=>votes(b)-votes(a)); renderList(); }
+      catch(e){ alert('Could not save vote: '+e.message); }
+    }
+
+    async function setStatus(id,st){
+      try{ await updateDoc(doc(db,'suggestions',id),{status:st, reviewedBy:currentUser.email, reviewedAt:serverTimestamp()}); await loadSuggestions(); }
+      catch(e){ alert('Could not update: '+e.message); }
+    }
+
+    async function saveComment(id){
+      const val=document.getElementById('cmt-'+id).value.trim();
+      try{ await updateDoc(doc(db,'suggestions',id),{managerComment:val, commentBy:currentUser.email, commentAt:serverTimestamp()}); await loadSuggestions(); }
+      catch(e){ alert('Could not save note: '+e.message); }
+    }
+  </script>
+</body>
+</html>

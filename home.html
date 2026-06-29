@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0F3D38" />
+  <title>Isuru Bag Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pine:#0F3D38; --pine-deep:#0A2C28; --honey:#E0A340; --honey-deep:#C8862A;
+      --ink:#12211F; --muted:#6B7C79; --line:#E4E8E6; --card:#FFF; --bg:#F1F4F2;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased}
+
+    .topbar{position:sticky;top:0;z-index:20;background:var(--pine);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+    .topbar .mark{width:34px;height:34px;border-radius:10px;flex:none;background:linear-gradient(150deg,var(--honey),var(--honey-deep));display:flex;align-items:center;justify-content:center}
+    .topbar .mark svg{width:18px;height:18px}
+    .topbar .title{flex:1;min-width:0}
+    .topbar .title h1{font-size:16px;font-weight:700;line-height:1.1}
+    .topbar .title span{font-size:11.5px;color:rgba(255,255,255,.65)}
+    .topbar button{font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:none;border-radius:9px;padding:8px 11px;cursor:pointer}
+    .topbar button:hover{background:rgba(255,255,255,.22)}
+
+    .page{max-width:760px;margin:0 auto;padding:22px 16px}
+    .hello{margin-bottom:20px}
+    .hello h2{font-size:21px;font-weight:800;letter-spacing:-.3px}
+    .hello p{font-size:14px;color:var(--muted);margin-top:3px}
+
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+    .nav-card{
+      display:block;text-decoration:none;color:inherit;
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      padding:18px;box-shadow:0 4px 14px rgba(15,61,56,.05);
+      transition:transform .08s, box-shadow .15s;position:relative;
+    }
+    .nav-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,61,56,.10)}
+    .nav-card.soon{opacity:.6;pointer-events:none}
+    .nav-card .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+    .nav-card .ic svg{width:23px;height:23px}
+    .ic.a{background:#E5EFEC;color:var(--pine)}
+    .ic.b{background:#FBF1DE;color:var(--honey-deep)}
+    .ic.c{background:#EAEFF6;color:#3A5A86}
+    .ic.d{background:#F1EAF4;color:#6A4A86}
+    .nav-card h3{font-size:16px;font-weight:700}
+    .nav-card p{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+    .soon-tag{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:3px 9px}
+
+    .gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .gate p{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div id="app" style="display:none">
+    <div class="topbar">
+      <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6L5 8Z" fill="#fff"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="#C8862A" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      <div class="title"><h1>Isuru Bag Center</h1><span>Staff app</span></div>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+
+    <div class="page">
+      <div class="hello">
+        <h2 id="greeting">Welcome</h2>
+        <p id="whoLabel"></p>
+      </div>
+
+      <div class="cards">
+        <a class="nav-card" href="catalog.html">
+          <div class="ic a"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+          <h3>Catalog</h3>
+          <p>Your product photo book. Add and search bags.</p>
+        </a>
+
+        <a class="nav-card" href="reorders.html">
+          <div class="ic b"><svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></div>
+          <h3>Reorders</h3>
+          <p>Log what to bring from the warehouse tomorrow.</p>
+        </a>
+
+        <a class="nav-card" href="repairs.html">
+          <div class="ic c"><svg viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-9 9-6 1 1-6 8-10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></div>
+          <h3>Repairs</h3>
+          <p>Track customer bag repairs from intake to handover.</p>
+        </a>
+
+        <a class="nav-card" href="suggestions.html">
+          <div class="ic d"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 .9 1.5 1.6 1.5 3h5c0-1.4.5-2.1 1.5-3A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <h3>Suggestions</h3>
+          <p>Share new designs and shop improvement ideas.</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="gate" id="gate" style="display:none"><p>Taking you to sign in…</p></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02",
+      measurementId: "G-6ZW4E68EL4"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('gate').style.display = 'none';
+        document.getElementById('whoLabel').textContent = user.email;
+        const h = new Date().getHours();
+        document.getElementById('greeting').textContent =
+          h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      }else{
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('gate').style.display = 'flex';
+        window.location.href = 'index.html';
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => window.location.href = 'index.html');
+    });
+  </script>
+</body>
+</html>

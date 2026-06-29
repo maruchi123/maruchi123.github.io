@@ -66,7 +66,7 @@
       display:inline-block;margin:0 auto 16px;
       box-shadow:0 10px 28px rgba(0,0,0,.28);
     }
-    .logo-panel img{display:block;width:210px;max-width:62vw;height:auto}
+    .logo-panel img{display:block;width:150px;max-width:48vw;height:auto}
     .brand h1{
       font-size:22px;font-weight:800;letter-spacing:-.3px;
       line-height:1.2;
@@ -239,7 +239,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+      setPersistence, browserLocalPersistence
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     // ---- Your Firebase project (safe to keep in the page) ----
@@ -255,6 +256,7 @@
 
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    setPersistence(auth, browserLocalPersistence);  // keeps staff signed in until they tap Sign out
 
     // ---- Elements ----
     const loginView   = document.getElementById('loginView');

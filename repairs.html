@@ -554,6 +554,11 @@
         </div>`;
       window.print();
     }
+    // open the form automatically when arriving from a dashboard quick action
+    if(new URLSearchParams(location.search).get('new')==='1'){
+      const t=document.getElementById('toggleNew');
+      if(t && !document.getElementById('formCard').classList.contains('open')) t.click();
+    }
   </script>
 </body>
 </html>

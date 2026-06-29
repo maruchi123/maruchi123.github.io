@@ -126,11 +126,30 @@
     .b-dispatched{background:#FBF1DE;color:var(--honey-deep)}
     .b-received{background:#E7F4EC;color:var(--ok)}
     .b-short{background:var(--danger-bg);color:var(--danger);margin-left:6px}
+    .b-partial{background:#FCEFD9;color:#B5701A}
+    .b-supply{background:#EDE9F6;color:#6A4A86;margin-left:6px}
 
-    .req-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+    .req-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
     .stamp{font-size:11px;color:var(--muted);line-height:1.4}
     .act{font-family:inherit;font-size:12.5px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:9px;padding:9px 13px;cursor:pointer;flex:none}
     .act:hover{background:#142E61}
+    .act.secondary{background:#fff;color:var(--pine);border:1.5px solid var(--line)}
+    .act.secondary:hover{background:var(--field)}
+    .req-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+    /* send / download list bar */
+    .listbar{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:16px;box-shadow:0 4px 14px rgba(26,58,122,.05)}
+    .listbar .lb-info{font-size:13px;color:var(--muted);margin-bottom:11px}
+    .listbar .lb-info strong{color:var(--pine);font-size:16px}
+    .listbar .lb-actions{display:flex;gap:9px}
+    .listbar .lb-actions button{flex:1;font-family:inherit;font-size:13.5px;font-weight:700;border-radius:10px;padding:11px 8px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:7px}
+    .listbar .lb-actions svg{width:16px;height:16px}
+    .lb-wa{background:#25D366;color:#fff}
+    .lb-wa:hover{background:#1faa53}
+    .lb-img{background:var(--field);color:var(--pine);border:1.5px solid var(--line)!important}
+    .lb-img:hover{background:#E7EDF9}
+    .lb-print{background:var(--pine);color:#fff}
+    .lb-print:hover{background:#142E61}
 
     .recv-form{display:none;margin-top:11px;padding-top:11px;border-top:1px solid var(--line);gap:9px;align-items:flex-end}
     .recv-form.open{display:flex}
@@ -151,6 +170,28 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:var(--pine)}
     .tab:active{background:var(--bg)}
+
+    /* ---- printable reorder list (80mm thermal) ---- */
+    @media screen { #printArea{display:none} }
+    @media print{
+      body{background:#fff}
+      body > *:not(#printArea){display:none !important}
+      #printArea{display:block !important;margin:0;padding:0}
+      .pl-doc{max-width:300px;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;color:#000;line-height:1.4}
+      .pl-logo{display:block;width:120px;max-width:62%;margin:0 auto 6px}
+      .pl-head{text-align:center;border-bottom:1px dashed #444;padding-bottom:8px;margin-bottom:8px}
+      .pl-head h1{font-size:17px;font-weight:800;line-height:1.15}
+      .pl-head p{font-size:10.5px;color:#222;margin-top:3px;line-height:1.35}
+      .pl-title{text-align:center;font-weight:800;font-size:14px;letter-spacing:.5px}
+      .pl-date{text-align:center;font-size:11px;color:#222;margin:2px 0 10px}
+      .pl-item{padding:6px 0;border-bottom:1px dashed #bbb}
+      .pl-item .nm{font-weight:700;font-size:12.5px}
+      .pl-item .dt{font-size:11.5px;margin-top:2px}
+      .pl-item .nt{font-size:11px;font-style:italic;margin-top:2px;color:#333}
+      .pl-total{margin-top:10px;font-weight:800;font-size:13px;text-align:center}
+      .pl-deliver{text-align:center;font-size:11.5px;margin-top:4px;border-top:1px dashed #444;padding-top:8px}
+      .pl-sign{margin-top:16px;font-size:11px;line-height:2.6}
+    }
   </style>
 </head>
 <body>
@@ -230,6 +271,25 @@
         </div>
       </div>
 
+      <!-- send / download today's list -->
+      <div class="listbar" id="listBar" style="display:none">
+        <div class="lb-info"><strong id="lbCount">0</strong> pending items to send to the warehouse</div>
+        <div class="lb-actions">
+          <button class="lb-wa" id="sendWaBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.5.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.2.2.1.4.1.5-.1l.7-.8c.2-.2.3-.2.6-.1l1.9.9c.3.1.4.2.5.3.1.2.1.6-.1 1.1Z"/></svg>
+            WhatsApp
+          </button>
+          <button class="lb-print" id="printListBtn">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8v-7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            Print
+          </button>
+          <button class="lb-img" id="saveImgBtn">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Image
+          </button>
+        </div>
+      </div>
+
       <!-- filters -->
       <div class="filters">
         <button data-f="pending" class="active">Pending</button>
@@ -250,6 +310,8 @@
   </nav>
 
   <div class="gate" id="gate" style="display:none"><p>Taking you to sign in…</p></div>
+
+  <div id="printArea"></div>
 
   <script src="config.js"></script>
   <script type="module">
@@ -518,12 +580,13 @@
       });
     });
 
-    const STATUS_LABEL = {requested:'Requested',approved:'Approved',dispatched:'Dispatched',received:'Received'};
-    const NEXT = {requested:'approved',approved:'dispatched',dispatched:'received'};
-    const NEXT_LABEL = {requested:'Approve',approved:'Mark dispatched',dispatched:'Mark received'};
+    const STATUS_LABEL = {requested:'Requested',approved:'Approved',dispatched:'Dispatched',partial:'Partly received',received:'Received'};
+    const NEXT = {requested:'approved',approved:'dispatched'};
+    const NEXT_LABEL = {requested:'Approve',approved:'Mark dispatched'};
 
     function renderList(){
       const wrap = document.getElementById('listWrap');
+      updateListBar();
       let list = reorders;
       if(currentFilter==='pending') list = reorders.filter(r=>r.status!=='received');
       else if(currentFilter==='received') list = reorders.filter(r=>r.status==='received');
@@ -535,55 +598,65 @@
 
       wrap.innerHTML = list.map(r=>{
         const img = r.photoURL ? `<img src="${r.photoURL}" alt="">` : `<span class="nopic">No photo</span>`;
-        const short = (r.status==='received' && r.receivedQty!=null && r.receivedQty < r.quantity);
-        const badge = `<span class="badge b-${r.status}">${STATUS_LABEL[r.status]}</span>${short?`<span class="badge b-short">Short ${r.receivedQty}/${r.quantity}</span>`:''}`;
+
+        let badge = `<span class="badge b-${r.status}">${STATUS_LABEL[r.status]}</span>`;
+        if(r.status==='partial' && r.receivedQty!=null){
+          badge += `<span class="badge b-short">${r.quantity-r.receivedQty} pending</span>`;
+        }else if(r.status==='received' && r.receivedQty!=null && r.receivedQty < r.quantity){
+          badge += `<span class="badge b-short">Short ${r.receivedQty}/${r.quantity}</span>`;
+        }
+
         const meta = [r.itemCode, r.color].filter(Boolean).map(escapeHtml).join(' · ');
         const notes = r.notes ? `<div class="req-notes">${escapeHtml(r.notes)}</div>` : '';
 
+        let qtyText = `Qty: ${r.quantity}`;
+        if(r.status==='partial' && r.receivedQty!=null) qtyText = `Qty: ${r.quantity} — received ${r.receivedQty}, ${r.quantity-r.receivedQty} still pending`;
+        else if(r.status==='received' && r.receivedQty!=null && r.receivedQty < r.quantity) qtyText = `Qty: ${r.quantity} — received ${r.receivedQty}`;
+
         // stamp = latest action
         let stamp = `Requested by ${escapeHtml((r.requestedBy||'').split('@')[0])} · ${timeAgo(r.requestedAt)}`;
-        if(r.status==='received' && r.receivedBy) stamp = `Received by ${escapeHtml(r.receivedBy.split('@')[0])} · ${timeAgo(r.receivedAt)}`;
+        if((r.status==='received'||r.status==='partial') && r.receivedBy) stamp = `Received by ${escapeHtml(r.receivedBy.split('@')[0])} · ${timeAgo(r.receivedAt)}`;
         else if(r.status==='dispatched' && r.dispatchedBy) stamp = `Dispatched by ${escapeHtml(r.dispatchedBy.split('@')[0])} · ${timeAgo(r.dispatchedAt)}`;
         else if(r.status==='approved' && r.approvedBy) stamp = `Approved by ${escapeHtml(r.approvedBy.split('@')[0])} · ${timeAgo(r.approvedAt)}`;
 
-        const next = NEXT[r.status];
-        const actionBtn = next ? `<button class="act" data-id="${r.id}" data-next="${next}">${NEXT_LABEL[r.status]}</button>` : '';
+        const pipelineNext = NEXT[r.status];
+        let actions = '';
+        if(pipelineNext) actions += `<button class="act" data-id="${r.id}" data-next="${pipelineNext}">${NEXT_LABEL[r.status]}</button>`;
+        if(r.status!=='received') actions += `<button class="act secondary" data-recv="${r.id}">${r.status==='partial'?'Receive more':'Receive'}</button>`;
 
         return `<div class="req">
           <div class="req-top">
             ${img}
             <div class="req-info">
               <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
-                <span class="req-name">${escapeHtml(r.itemName)}</span>
+                <span class="req-name">${escapeHtml(r.itemName)}${r.kind==='supply'?' <span class="badge b-supply">Supply</span>':''}</span>
               </div>
               ${meta?`<div class="req-meta">${meta}</div>`:''}
-              <div class="req-qty">Qty: ${r.quantity}</div>
+              <div class="req-qty">${qtyText}</div>
             </div>
             <div>${badge}</div>
           </div>
           ${notes}
           <div class="recv-form" id="recv-${r.id}">
-            <div class="f"><label>How many actually received?</label><input type="number" min="0" id="recvqty-${r.id}" value="${r.quantity}"></div>
+            <div class="f"><label>Received so far (out of ${r.quantity})</label><input type="number" min="0" id="recvqty-${r.id}" value="${r.receivedQty!=null?r.receivedQty:r.quantity}"></div>
             <button class="act" data-confirm="${r.id}">Confirm</button>
           </div>
           <div class="req-foot">
             <span class="stamp">${stamp}<br>Needed by ${niceDate(r.neededBy)}</span>
-            ${actionBtn}
+            <div class="req-actions">${actions}</div>
           </div>
         </div>`;
       }).join('');
 
-      // wire action buttons
+      // pipeline advance (approve / dispatch)
       wrap.querySelectorAll('.act[data-next]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const id = btn.dataset.id, next = btn.dataset.next;
-          if(next==='received'){
-            document.getElementById('recv-'+id).classList.add('open');
-          }else{
-            advance(id, next);
-          }
-        });
+        btn.addEventListener('click', ()=> advance(btn.dataset.id, btn.dataset.next));
       });
+      // open receive form
+      wrap.querySelectorAll('.act[data-recv]').forEach(btn=>{
+        btn.addEventListener('click', ()=> document.getElementById('recv-'+btn.dataset.recv).classList.add('open'));
+      });
+      // confirm received qty
       wrap.querySelectorAll('.act[data-confirm]').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           const id = btn.dataset.confirm;
@@ -593,16 +666,133 @@
       });
     }
 
-    async function advance(id, next, receivedQty){
-      const patch = { status: next };
+    async function advance(id, action, receivedQty){
+      const patch = { status: action };
       const now = serverTimestamp();
-      if(next==='approved'){ patch.approvedBy=currentUser.email; patch.approvedAt=now; }
-      if(next==='dispatched'){ patch.dispatchedBy=currentUser.email; patch.dispatchedAt=now; }
-      if(next==='received'){ patch.receivedBy=currentUser.email; patch.receivedAt=now; patch.receivedQty = receivedQty; }
+      if(action==='approved'){ patch.approvedBy=currentUser.email; patch.approvedAt=now; }
+      if(action==='dispatched'){ patch.dispatchedBy=currentUser.email; patch.dispatchedAt=now; }
+      if(action==='received'){
+        const r = reorders.find(x=>x.id===id);
+        const total = (receivedQty==null) ? r.quantity : receivedQty;
+        if(total >= r.quantity){ patch.status='received'; patch.receivedQty = r.quantity; }
+        else { patch.status='partial'; patch.receivedQty = total; }   // shortfall stays pending
+        patch.receivedBy=currentUser.email; patch.receivedAt=now;
+      }
       try{
         await updateDoc(doc(db,'reorders',id), patch);
         await loadReorders();
       }catch(e){ alert('Could not update: ' + e.message); }
+    }
+
+    // ---- send / download the day's list ----
+    function pendingList(){
+      return reorders
+        .filter(r=>r.status!=='received')
+        .sort((a,b)=>{
+          const ka = a.kind==='supply'?1:0, kb = b.kind==='supply'?1:0;   // bags first, supplies under them
+          return ka-kb || (a.neededBy||'').localeCompare(b.neededBy||'') || (a.itemName||'').localeCompare(b.itemName||'');
+        });
+    }
+    function pendingQty(r){
+      return (r.status==='partial' && r.receivedQty!=null) ? (r.quantity - r.receivedQty) : r.quantity;
+    }
+    function updateListBar(){
+      const n = pendingList().length;
+      document.getElementById('lbCount').textContent = n;
+      document.getElementById('listBar').style.display = n>0 ? 'block':'none';
+    }
+    function listText(){
+      const items = pendingList();
+      const today = new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+      const lines = [];
+      lines.push(`*Isuru Bag Center \u2014 Reorder list*`);
+      lines.push(`_${today}_`);
+      lines.push('');
+      items.forEach((r,i)=>{
+        let line = `${i+1}. ${pendingQty(r)}\u00d7 ${r.itemName}`;
+        const ex = [r.color, r.itemCode].filter(Boolean);
+        if(ex.length) line += ` (${ex.join(', ')})`;
+        lines.push(line);
+        if(r.notes) lines.push(`   - ${r.notes}`);
+      });
+      lines.push('');
+      lines.push(`Total: ${items.length} item${items.length===1?'':'s'}`);
+      return lines.join('\n');
+    }
+    document.getElementById('sendWaBtn').addEventListener('click', ()=>{
+      if(pendingList().length===0){ alert('No pending items to send.'); return; }
+      // no phone number -> WhatsApp lets you pick the warehouse group or person
+      window.open(`https://wa.me/?text=${encodeURIComponent(listText())}`,'_blank');
+    });
+
+    document.getElementById('saveImgBtn').addEventListener('click', saveListImage);
+
+    document.getElementById('printListBtn').addEventListener('click', printList);
+    function printList(){
+      const items = pendingList();
+      if(items.length===0){ alert('No pending items to print.'); return; }
+      const today = new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      const tomorrow = niceDate(tomorrowISO());
+      const rows = items.map((r,i)=>{
+        const dt = [`${pendingQty(r)} pcs`, r.color, r.itemCode].filter(Boolean).map(escapeHtml).join('  \u00b7  ');
+        const nt = r.notes ? `<div class="nt">Note: ${escapeHtml(r.notes)}</div>` : '';
+        return `<div class="pl-item"><div class="nm">${i+1}. ${escapeHtml(r.itemName)}</div><div class="dt">${dt}</div>${nt}</div>`;
+      }).join('');
+      const pa = document.getElementById('printArea');
+      pa.innerHTML = `<div class="pl-doc">
+        <img class="pl-logo" src="logo.png" alt="">
+        <div class="pl-head">
+          <h1>Isuru Bag Center</h1>
+          <p>No 08, 5th Cross Street, Ambalangoda<br>0715 830 023 / 0769 837 001</p>
+        </div>
+        <div class="pl-title">REORDER LIST</div>
+        <div class="pl-date">${today}</div>
+        ${rows}
+        <div class="pl-total">Total: ${items.length} item${items.length===1?'':'s'}</div>
+        <div class="pl-deliver">Please deliver by: ${tomorrow}</div>
+        <div class="pl-sign">Handed over: ___________________<br>Received: ___________________<br>Date: ___________</div>
+      </div>`;
+      const img = pa.querySelector('img');
+      if(img && !img.complete){ img.onload=()=>window.print(); img.onerror=()=>window.print(); }
+      else window.print();
+    }
+    async function saveListImage(){
+      const items = pendingList();
+      if(items.length===0){ alert('No pending items to save.'); return; }
+      try{ await document.fonts.ready; }catch(e){}
+      const today = new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+      const W=820, pad=44, rowH=66, headerH=158, footerH=72;
+      const H=headerH + items.length*rowH + footerH, scale=2;
+      const c=document.createElement('canvas'); c.width=W*scale; c.height=H*scale;
+      const ctx=c.getContext('2d'); ctx.scale(scale,scale);
+      const F=(w,s)=>`${w} ${s}px "Plus Jakarta Sans", system-ui, sans-serif`;
+      const fit=(t,maxW)=>{ if(ctx.measureText(t).width<=maxW) return t; let s=t; while(s.length>1 && ctx.measureText(s+'\u2026').width>maxW) s=s.slice(0,-1); return s+'\u2026'; };
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#1A3A7A'; ctx.fillRect(0,0,W,headerH);
+      ctx.fillStyle='#fff'; ctx.font=F(800,32); ctx.fillText('Isuru Bag Center', pad, 60);
+      ctx.font=F(600,21); ctx.fillText('Reorder List', pad, 96);
+      ctx.fillStyle='rgba(255,255,255,.82)'; ctx.font=F(400,16); ctx.fillText(today, pad, 126);
+      let y=headerH+34;
+      items.forEach((r,i)=>{
+        if(i%2===0){ ctx.fillStyle='#F5F7F6'; ctx.fillRect(pad-14, y-26, W-2*(pad-14), rowH-6); }
+        ctx.fillStyle='#1A3A7A'; ctx.font=F(800,23); ctx.fillText(`${pendingQty(r)}\u00d7`, pad, y);
+        ctx.fillStyle='#12211F'; ctx.font=F(600,19); ctx.fillText(fit(r.itemName||'', W-pad-160), pad+74, y-6);
+        const sub=[r.color, r.itemCode, r.notes].filter(Boolean).join('   \u00b7   ');
+        if(sub){ ctx.fillStyle='#6B7C79'; ctx.font=F(400,15); ctx.fillText(fit(sub, W-pad-170), pad+74, y+18); }
+        y+=rowH;
+      });
+      ctx.fillStyle='#6B7C79'; ctx.font=F(700,16);
+      ctx.fillText(`Total: ${items.length} item${items.length===1?'':'s'}`, pad, H-30);
+      ctx.textAlign='right'; ctx.fillStyle='#9AA7A4'; ctx.font=F(500,14);
+      ctx.fillText('Generated by Isuru Bag Center app', W-pad, H-30); ctx.textAlign='left';
+      c.toBlob(blob=>{
+        if(!blob){ alert('Could not create image.'); return; }
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=`reorder-list-${new Date().toISOString().slice(0,10)}.png`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+      }, 'image/png');
     }
     // open the form automatically when arriving from a dashboard quick action
     if(new URLSearchParams(location.search).get('new')==='1'){

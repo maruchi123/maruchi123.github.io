@@ -154,6 +154,8 @@
     .slip .line .k{color:#555;font-weight:600}
     .slip .line .v{text-align:right;font-weight:700}
     .slip .note{border-top:2px dashed #999;margin-top:12px;padding-top:10px;text-align:center;font-size:11px;color:#444}
+    .slip .logo{display:block;width:140px;max-width:60%;margin:0 auto 8px}
+    .slip .contact{border-top:2px dashed #999;margin-top:10px;padding-top:8px;text-align:center;font-size:10.5px;color:#333;line-height:1.6}
     @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
     /* ---- bottom tab bar ---- */
     .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 4px;padding-bottom:calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
@@ -161,6 +163,11 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:var(--pine)}
     .tab:active{background:var(--bg)}
+    .dlbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    .dl-lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+    .dl-btn{font-family:inherit;font-size:12.5px;font-weight:700;color:var(--pine);background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:8px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+    .dl-btn:hover{background:var(--field)}
+    .dl-btn svg{width:15px;height:15px}
   </style>
 </head>
 <body>
@@ -179,7 +186,7 @@
 
       <!-- intake form -->
       <div class="form-card" id="formCard">
-        <h2>New repair intake</h2>
+        <h2 id="formTitle">New repair intake</h2>
         <div class="form-msg" id="formMsg"></div>
 
         <input type="file" id="photoInput" accept="image/*" style="display:none" />
@@ -229,6 +236,12 @@
         <button data-f="all">All</button>
       </div>
 
+      <div class="dlbar">
+        <span class="dl-lbl">Download this list:</span>
+        <button class="dl-btn" id="dlPdfBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>PDF</button>
+        <button class="dl-btn" id="dlCsvBtn"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV (Excel)</button>
+      </div>
+
       <div id="listWrap"><div class="state"><p>Loading…</p></div></div>
     </div>
 
@@ -250,6 +263,8 @@
   <!-- printable slip target (direct child of body) -->
   <div id="printArea"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="config.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -301,7 +316,7 @@
 
     // form
     const formCard = document.getElementById('formCard');
-    document.getElementById('toggleNew').addEventListener('click', ()=>{ formCard.classList.toggle('open'); if(formCard.classList.contains('open')) formCard.scrollIntoView({behavior:'smooth'}); });
+    document.getElementById('toggleNew').addEventListener('click', ()=>{ if(formCard.classList.contains('open')){ resetForm(); } else { resetForm(); formCard.classList.add('open'); formCard.scrollIntoView({behavior:'smooth'}); } });
     document.getElementById('cancelBtn').addEventListener('click', resetForm);
 
     document.getElementById('paidToggle').addEventListener('change', e=>{
@@ -332,8 +347,11 @@
     }
 
     const saveBtn=document.getElementById('saveBtn'),saveSpinner=document.getElementById('saveSpinner'),saveText=document.getElementById('saveText'),formMsg=document.getElementById('formMsg');
+    const formTitle=document.getElementById('formTitle');
+    let editingId=null, editingDamagePhoto='';
+    const DEFAULT_PHOTO_R=`<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg><p>Photo of the damaged bag</p><p class="hint">Take a photo or choose from gallery</p>`;
     function showFormError(t){formMsg.textContent=t;formMsg.style.display='block';}
-    function setSaving(on,label){saveBtn.disabled=on;saveSpinner.style.display=on?'block':'none';saveText.textContent=on?(label||'Saving…'):'Create repair ticket';}
+    function setSaving(on,label){saveBtn.disabled=on;saveSpinner.style.display=on?'block':'none';saveText.textContent=on?(label||'Saving…'):(editingId?'Save changes':'Create repair ticket');}
 
     saveBtn.addEventListener('click', async ()=>{
       formMsg.style.display='none';
@@ -348,35 +366,71 @@
       if(!phone){ showFormError('Please enter the customer phone number.'); return; }
 
       try{
-        setSaving(true, selectedFile?'Uploading photo…':'Creating ticket…');
-        let damagePhoto='';
-        if(selectedFile){ damagePhoto = await uploadPhoto(selectedFile); }
-        setSaving(true,'Creating ticket…');
-        const ticketId = await nextTicketId();
-
-        await addDoc(collection(db,'repairs'),{
-          ticketId, customerName:name, customerPhone:phone,
-          bagDescription:desc, issue, damagePhoto,
-          isPaid, amount: isPaid && amount ? Number(amount) : null,
-          status:'received',
-          receivedBy: currentUser.email, receivedAt: serverTimestamp()
-        });
-
-        resetForm();
-        await loadRepairs();
-        // offer to print the slip right away
-        const justMade = repairs.find(r=>r.ticketId===ticketId);
-        if(justMade) printSlip(justMade);
+        if(editingId){
+          // ---- edit existing repair: details only (ticket, status, history unchanged) ----
+          setSaving(true, selectedFile?'Uploading photo…':'Saving…');
+          let damagePhoto = editingDamagePhoto;
+          if(selectedFile){ damagePhoto = await uploadPhoto(selectedFile); }
+          setSaving(true,'Saving…');
+          await updateDoc(doc(db,'repairs',editingId),{
+            customerName:name, customerPhone:phone,
+            bagDescription:desc, issue, damagePhoto,
+            isPaid, amount: isPaid && amount ? Number(amount) : null
+          });
+          resetForm();
+          await loadRepairs();
+        }else{
+          // ---- new intake ----
+          setSaving(true, selectedFile?'Uploading photo…':'Creating ticket…');
+          let damagePhoto='';
+          if(selectedFile){ damagePhoto = await uploadPhoto(selectedFile); }
+          setSaving(true,'Creating ticket…');
+          const ticketId = await nextTicketId();
+          await addDoc(collection(db,'repairs'),{
+            ticketId, customerName:name, customerPhone:phone,
+            bagDescription:desc, issue, damagePhoto,
+            isPaid, amount: isPaid && amount ? Number(amount) : null,
+            status:'received',
+            receivedBy: currentUser.email, receivedAt: serverTimestamp()
+          });
+          resetForm();
+          await loadRepairs();
+          const justMade = repairs.find(r=>r.ticketId===ticketId);
+          if(justMade) printSlip(justMade);
+        }
       }catch(e){ showFormError(e.message||'Could not save. Please try again.'); }
       finally{ setSaving(false); }
     });
 
+    function openEditRepair(r){
+      editingId=r.id; editingDamagePhoto=r.damagePhoto||'';
+      document.getElementById('custName').value=r.customerName||'';
+      document.getElementById('custPhone').value=r.customerPhone||'';
+      document.getElementById('bagDesc').value=r.bagDescription||'';
+      document.getElementById('issueDesc').value=r.issue||'';
+      document.getElementById('paidToggle').checked=!!r.isPaid;
+      document.getElementById('amountWrap').style.display = r.isPaid?'block':'none';
+      document.getElementById('amountInput').value = (r.amount!=null)?r.amount:'';
+      selectedFile=null; photoInput.value='';
+      photoPick.innerHTML = r.damagePhoto
+        ? `<img src="${r.damagePhoto}" alt=""><p class="hint" style="margin-top:8px">Tap to change photo</p>`
+        : DEFAULT_PHOTO_R;
+      formTitle.textContent='Edit repair';
+      saveText.textContent='Save changes';
+      formMsg.style.display='none';
+      formCard.classList.add('open');
+      formCard.scrollIntoView({behavior:'smooth'});
+    }
+
     function resetForm(){
+      editingId=null; editingDamagePhoto='';
       ['custName','custPhone','bagDesc','issueDesc','amountInput'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('paidToggle').checked=false;
       document.getElementById('amountWrap').style.display='none';
       selectedFile=null; photoInput.value='';
-      photoPick.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg><p>Photo of the damaged bag</p><p class="hint">Take a photo or choose from gallery</p>`;
+      photoPick.innerHTML=DEFAULT_PHOTO_R;
+      formTitle.textContent='New repair intake';
+      saveText.textContent='Create repair ticket';
       formMsg.style.display='none'; formCard.classList.remove('open');
     }
 
@@ -395,6 +449,70 @@
     }));
     document.getElementById('searchInput').addEventListener('input', renderList);
 
+    // ---- download repair list (PDF / CSV) ----
+    const FILTER_LABEL = {active:'In progress', received:'Received', atFactory:'At factory', ready:'Ready for pickup', collected:'Collected', all:'All repairs'};
+    function exportList(){
+      const term=document.getElementById('searchInput').value.trim().toLowerCase();
+      let list=repairs;
+      if(currentFilter==='active') list=repairs.filter(r=>r.status!=='collected');
+      else if(currentFilter!=='all') list=repairs.filter(r=>r.status===currentFilter);
+      if(term) list=list.filter(r=>
+        (r.ticketId||'').toLowerCase().includes(term) ||
+        (r.customerName||'').toLowerCase().includes(term) ||
+        (r.customerPhone||'').toLowerCase().includes(term));
+      return list;
+    }
+    function fmtDate(ts){ return (ts && ts.toDate) ? ts.toDate().toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}) : ''; }
+    function charge(r){ return r.isPaid ? ('Rs. ' + (r.amount!=null?r.amount:'')) : '-'; }
+    function stampDate(){ return new Date().toISOString().slice(0,10); }
+
+    document.getElementById('dlCsvBtn').addEventListener('click', ()=>{
+      const list = exportList();
+      if(list.length===0){ alert('No repairs in this list to download.'); return; }
+      const esc = v => { v=String(v==null?'':v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+      const headers = ['Ticket','Customer','Phone','Bag','Issue','Status','Paid','Charge','Received','Collected'];
+      const rows = list.map(r=>[
+        r.ticketId||'', r.customerName||'', r.customerPhone||'', r.bagDescription||'', r.issue||'',
+        STATUS_LABEL[r.status]||r.status||'', r.isPaid?'Yes':'No', r.isPaid&&r.amount!=null?r.amount:'',
+        fmtDate(r.receivedAt), fmtDate(r.collectedAt)
+      ]);
+      const csv = [headers, ...rows].map(row=>row.map(esc).join(',')).join('\n');
+      const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});  // BOM = Excel reads it right
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `repairs-${currentFilter}-${stampDate()}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    });
+
+    document.getElementById('dlPdfBtn').addEventListener('click', ()=>{
+      const list = exportList();
+      if(list.length===0){ alert('No repairs in this list to download.'); return; }
+      if(!window.jspdf || !window.jspdf.jsPDF){ alert('PDF tool is still loading — please check your connection and try again.'); return; }
+      const { jsPDF } = window.jspdf;
+      const docp = new jsPDF({orientation:'landscape', unit:'pt', format:'a4'});
+      docp.setFont('helvetica','bold'); docp.setFontSize(16); docp.setTextColor(26,58,122);
+      docp.text('Isuru Bag Center — Repairs', 40, 42);
+      docp.setFont('helvetica','normal'); docp.setFontSize(10); docp.setTextColor(80);
+      const today = new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+      docp.text(`${FILTER_LABEL[currentFilter]||''}  ·  ${list.length} repair${list.length===1?'':'s'}  ·  ${today}`, 40, 60);
+      const body = list.map(r=>[
+        r.ticketId||'', r.customerName||'', r.customerPhone||'', r.bagDescription||'', r.issue||'',
+        STATUS_LABEL[r.status]||r.status||'', charge(r), fmtDate(r.receivedAt)
+      ]);
+      docp.autoTable({
+        startY: 74,
+        head: [['Ticket','Customer','Phone','Bag','Issue','Status','Charge','Received']],
+        body,
+        styles:{ fontSize:9, cellPadding:5, overflow:'linebreak', valign:'top' },
+        headStyles:{ fillColor:[26,58,122], textColor:255, fontStyle:'bold' },
+        alternateRowStyles:{ fillColor:[245,247,246] },
+        columnStyles:{ 0:{cellWidth:60}, 1:{cellWidth:110}, 2:{cellWidth:90}, 5:{cellWidth:90}, 6:{cellWidth:70}, 7:{cellWidth:80} },
+        margin:{ left:40, right:40 }
+      });
+      docp.save(`repairs-${currentFilter}-${stampDate()}.pdf`);
+    });
+
     const STATUS_LABEL={received:'Received',atFactory:'At factory',ready:'Ready for pickup',collected:'Collected'};
     const NEXT={received:'atFactory',atFactory:'ready',ready:'collected'};
     const NEXT_LABEL={received:'Send to factory',atFactory:'Mark ready',ready:'Mark collected'};
@@ -410,7 +528,7 @@
       else if(r.status==='atFactory'&&r.sentBy) stamp=`At factory · sent by ${escapeHtml(r.sentBy.split('@')[0])} · ${fmt(r.sentAt)}`;
 
       const next=NEXT[r.status];
-      let acts=`<button class="act ghost" data-print="${r.id}">Print slip</button>`;
+      let acts=`<button class="act ghost" data-edit="${r.id}">Edit</button><button class="act ghost" data-print="${r.id}">Print slip</button>`;
       if(r.status==='ready') acts+=`<button class="act wa" data-wa="${r.id}">Message customer</button>`;
       if(next) acts+=`<button class="act" data-id="${r.id}" data-next="${next}">${NEXT_LABEL[r.status]}</button>`;
 
@@ -438,6 +556,9 @@
         const id=b.dataset.id, next=b.dataset.next;
         if(next==='collected'){ if(!confirm('Confirm this bag was handed to the customer?')) return; }
         advance(id,next);
+      }));
+      wrap.querySelectorAll('.act[data-edit]').forEach(b=> b.addEventListener('click', ()=>{
+        const r=repairs.find(x=>x.id===b.dataset.edit); if(r) openEditRepair(r);
       }));
       wrap.querySelectorAll('.act[data-print]').forEach(b=> b.addEventListener('click', ()=>{
         const r=repairs.find(x=>x.id===b.dataset.print); if(r) printSlip(r);
@@ -532,16 +653,35 @@
       return p;
     }
     function messageCustomer(r){
-      const msg=`Hello ${r.customerName}, your bag repair (${r.ticketId}) at Isuru Bag Center is ready for pickup. Please bring your repair slip. Thank you!`;
+      // WhatsApp text formatting:  *bold*   _italic_   ~strikethrough~
+      const msg = [
+        `Dear ${r.customerName},`,
+        ``,
+        `*Your bag repair is ready for pickup.*`,
+        `\u0d94\u0db6\u0d9c\u0dda \u0d85\u0dbd\u0dd4\u0dad\u0dca\u0dc0\u0dd0\u0da9\u0dd2\u0dba\u0dcf \u0d9a\u0dc5 \u0db6\u0dd1\u0d9c\u0dba Isuru Bag Center \u0dc0\u0dd9\u0dad\u0dd2\u0db1\u0dca \u0dbd\u0db6\u0dcf \u0d9c\u0dad \u0dc4\u0dd0\u0d9a\u0dd2\u0dba.`,
+        ``,
+        `*Repair No: ${r.ticketId}*`,
+        `Shop: Isuru Bag Center`,
+        ``,
+        `Please bring this repair number when you come to collect your bag.`,
+        `\u0d9a\u0dbb\u0dd4\u0dab\u0dcf\u0d9a\u0dbb \u0db6\u0dd1\u0d9c\u0dba \u0dbd\u0db6\u0dcf \u0d9c\u0dd0\u0db1\u0dd3\u0db8\u0da7 \u0d91\u0db1\u0dc0\u0dd2\u0da7 \u0db8\u0dd9\u0db8 \u0d85\u0dbd\u0dd4\u0dad\u0dca\u0dc0\u0dd0\u0da9\u0dd2\u0dba\u0dcf \u0d85\u0d82\u0d9a\u0dba \u0dbb\u0dd0\u0d9c\u0dd9\u0db1 \u0d91\u0db1\u0dca\u0db1.`,
+        ``,
+        `*Address:* No 08, 5th Cross Street, Ambalangoda`,
+        `*Phone:* 0715 830 023 / 0769 837 001`,
+        ``,
+        `Thank you for choosing Isuru Bag Center!`
+      ].join('\n');
       const url=`https://wa.me/${waNumber(r.customerPhone)}?text=${encodeURIComponent(msg)}`;
       window.open(url,'_blank');
     }
 
     // print slip
     function printSlip(r){
-      const paidLine = r.isPaid ? `<div class="line"><span class="k">Repair charge</span><span class="v">Rs. ${r.amount||'—'}</span></div>` : '';
-      document.getElementById('printArea').innerHTML = `
+      const paidLine = r.isPaid ? `<div class="line"><span class="k">Repair charge</span><span class="v">Rs. ${r.amount!=null?r.amount:'—'}</span></div>` : '';
+      const pa = document.getElementById('printArea');
+      pa.innerHTML = `
         <div class="slip">
+          <img class="logo" src="logo.png" alt="Isuru Bag Center" />
           <div class="sh"><h2>Isuru Bag Center</h2><p>Bag Repair Receipt</p></div>
           <div class="rc">REPAIR TICKET</div>
           <div class="tk">${escapeHtml(r.ticketId||'')}</div>
@@ -552,8 +692,15 @@
           <div class="line"><span class="k">Repair</span><span class="v">${escapeHtml(r.issue||'—')}</span></div>
           ${paidLine}
           <div class="note">Please present this slip to collect your bag.<br>We will notify you when it is ready.</div>
+          <div class="contact">No 08, 5th Cross Street, Ambalangoda<br>Tel: 0715 830 023 &nbsp;/&nbsp; 0769 837 001</div>
         </div>`;
-      window.print();
+      const img = pa.querySelector('img.logo');
+      if(img && !img.complete){
+        img.onload = () => window.print();
+        img.onerror = () => window.print();   // print even if the logo fails to load
+      } else {
+        window.print();
+      }
     }
     // open the form automatically when arriving from a dashboard quick action
     if(new URLSearchParams(location.search).get('new')==='1'){

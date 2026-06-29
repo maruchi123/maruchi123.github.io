@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1A3A7A" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <title>Supplies · Isuru Bag Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pine:#1A3A7A; --pine-deep:#122A5C; --pine-soft:#3E63B5;
+      --honey:#E0A340; --honey-deep:#C8862A;
+      --ink:#12211F; --muted:#6B7C79; --line:#E4E8E6;
+      --card:#FFF; --field:#F5F7F6; --bg:#F1F4F2;
+      --danger:#B23B3B; --danger-bg:#FBEDED; --ok:#1E7A52;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased}
+
+    .topbar{position:sticky;top:0;z-index:20;background:var(--pine);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+    .topbar a.back{color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14)}
+    .topbar a.back:hover{background:rgba(255,255,255,.22)}
+    .topbar a.back svg{width:18px;height:18px}
+    .topbar .title{flex:1;min-width:0}
+    .topbar .title h1{font-size:16px;font-weight:700;line-height:1.1}
+    .topbar .title span{font-size:11.5px;color:rgba(255,255,255,.65)}
+    .topbar button{font-family:inherit;font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:none;border-radius:9px;padding:8px 11px;cursor:pointer}
+    .topbar button:hover{background:rgba(255,255,255,.22)}
+
+    .page{max-width:760px;margin:0 auto;padding:16px 16px 86px}
+
+    .newbtn{width:100%;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
+    .newbtn:hover{background:#142E61}
+    .newbtn svg{width:18px;height:18px}
+
+    /* form */
+    .form-card{display:none;background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:18px;border:1px solid var(--line);box-shadow:0 6px 20px rgba(26,58,122,.06)}
+    .form-card.open{display:block}
+    .form-card h2{font-size:16px;font-weight:700;margin-bottom:14px}
+    .form-msg{display:none;font-size:13px;font-weight:500;padding:10px 12px;border-radius:10px;margin-bottom:14px;background:var(--danger-bg);color:var(--danger);border:1px solid #F3D6D6}
+    .lbl{display:block;font-size:12.5px;font-weight:600;margin-bottom:7px}
+    .inp{width:100%;font-family:inherit;font-size:15px;padding:12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);margin-bottom:14px}
+    .inp:focus{outline:none;border-color:var(--pine-soft);box-shadow:0 0 0 3px rgba(62,99,181,.10)}
+    .help{font-size:11.5px;color:var(--muted);margin:-9px 0 14px}
+    .row2{display:flex;gap:12px}
+    .row2 > div{flex:1}
+    .form-actions{display:flex;gap:10px;margin-top:4px}
+    .btn-primary{flex:1;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:14px;cursor:pointer;min-height:50px}
+    .btn-primary:hover{background:#142E61}
+    .btn-primary:disabled{background:var(--muted)}
+    .btn-cancel{flex:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer}
+    .btn-cancel:hover{background:var(--field)}
+
+    /* low-stock summary */
+    .alert{display:none;align-items:center;gap:10px;background:#FCEFD9;border:1px solid #F0D9AE;color:#8a5a12;border-radius:13px;padding:12px 14px;margin-bottom:16px;font-size:13.5px;font-weight:600}
+    .alert.show{display:flex}
+    .alert svg{width:20px;height:20px;flex:none}
+
+    /* filters */
+    .filters{display:flex;gap:8px;margin-bottom:16px}
+    .filters button{font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 15px;cursor:pointer}
+    .filters button.active{color:#fff;background:var(--pine);border-color:var(--pine)}
+
+    .group-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:6px 2px 10px}
+
+    /* supply cards */
+    .sup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:11px;box-shadow:0 4px 14px rgba(26,58,122,.05)}
+    .sup.low{border-color:#EBC98A;box-shadow:0 4px 14px rgba(200,134,42,.12)}
+    .sup-row{display:flex;align-items:center;gap:12px}
+    .sup-main{flex:1;min-width:0}
+    .sup-name{font-size:15px;font-weight:700;line-height:1.2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .sup-meta{font-size:12px;color:var(--muted);margin-top:3px}
+    .badge{display:inline-block;font-size:10px;font-weight:800;border-radius:20px;padding:3px 9px}
+    .b-low{background:var(--danger-bg);color:var(--danger)}
+
+    /* qty stepper */
+    .qty{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+    .qty-cap{font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .qty-row{display:flex;align-items:center;gap:8px}
+    .qbtn{width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-size:22px;font-weight:700;color:var(--pine);cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+    .qbtn:hover{background:var(--field)}
+    .qbtn:active{transform:scale(.95)}
+    .qnum{min-width:54px;text-align:center;font-family:inherit;font-size:21px;font-weight:800;color:var(--ink);background:none;border:none;cursor:pointer;padding:4px}
+    .qnum small{display:block;font-size:10px;font-weight:600;color:var(--muted);margin-top:1px}
+
+    /* photo thumb */
+    .sup-pic{width:58px;height:58px;border-radius:10px;object-fit:cover;flex:none;background:var(--field)}
+    .sup-pic.nopic{display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);text-align:center}
+
+    /* big add-to-reorder button + inline panel */
+    .sup-reorder{width:100%;font-family:inherit;font-size:13.5px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:10px;padding:11px;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:7px}
+    .sup-reorder:hover{background:#142E61}
+    .sup-reorder svg{width:16px;height:16px}
+    .reorder-panel{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+    .reorder-panel.open{display:block}
+    .rp-cap{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:8px}
+    .rp-row{display:flex;gap:8px;align-items:center}
+    .reorder-panel input{flex:1;width:100%;font-family:inherit;font-size:15px;padding:11px;border:1.5px solid var(--line);border-radius:10px}
+    .reorder-panel .rp-add{font-family:inherit;font-size:13.5px;font-weight:700;color:#fff;background:var(--ok);border:none;border-radius:10px;padding:12px 16px;cursor:pointer;flex:none}
+    .reorder-panel .rp-add:hover{filter:brightness(.95)}
+    .rp-done{color:var(--ok);font-weight:700;font-size:13.5px;padding:6px 0}
+
+    .sup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .sup-actions button{font-family:inherit;font-size:12px;font-weight:700;border-radius:8px;padding:7px 13px;cursor:pointer;border:1.5px solid var(--line);background:#fff}
+    .a-edit{color:var(--pine)}
+    .a-edit:hover{background:var(--field)}
+    .a-del{color:var(--danger)}
+    .a-del:hover{background:var(--danger-bg)}
+
+    /* form photo picker */
+    .photo-pick{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;cursor:pointer;background:var(--field);margin-bottom:14px}
+    .photo-pick:hover{border-color:var(--pine-soft)}
+    .photo-pick svg{width:26px;height:26px;color:var(--muted);margin-bottom:6px}
+    .photo-pick p{font-size:13px;color:var(--muted);font-weight:500}
+    .photo-pick .hint{font-size:11px;margin-top:2px}
+    .photo-pick img{max-width:100%;max-height:180px;border-radius:10px;display:block;margin:0 auto}
+
+    .state{text-align:center;padding:40px 20px;color:var(--muted)}
+    .state h3{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:6px}
+    .state p{font-size:13.5px;margin-bottom:14px}
+    .seedbtn{font-family:inherit;font-size:13.5px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:11px;padding:12px 18px;cursor:pointer}
+    .seedbtn:hover{background:#142E61}
+
+    .gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;color:var(--muted)}
+
+    .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 4px;padding-bottom:calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+    .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--muted);font-size:11px;font-weight:600;padding:6px 2px;border-radius:10px}
+    .tab svg{width:22px;height:22px}
+    .tab.active{color:var(--pine)}
+    .tab:active{background:var(--bg)}
+  </style>
+</head>
+<body>
+  <div id="app" style="display:none">
+    <div class="topbar">
+      <a class="back" href="home.html" aria-label="Home"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <div class="title"><h1>Supplies</h1><span>Bags &amp; stationery stock</span></div>
+      <button id="logoutBtn">Sign out</button>
+    </div>
+
+    <div class="page">
+      <button class="newbtn" id="toggleNew">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        New supply item
+      </button>
+
+      <!-- add / edit form -->
+      <div class="form-card" id="formCard">
+        <h2 id="formTitle">New supply item</h2>
+        <div class="form-msg" id="formMsg"></div>
+
+        <input type="file" id="photoInput" accept="image/*" style="display:none" />
+        <div class="photo-pick" id="photoPick">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg>
+          <p>Tap to add a photo <span style="color:var(--muted)">(optional)</span></p>
+          <p class="hint">Helpful for carrier bags</p>
+        </div>
+
+        <label class="lbl" for="nameInput">Item name</label>
+        <input class="inp" id="nameInput" type="text" placeholder="e.g. W-Cut Non-Woven Bags" />
+
+        <div class="row2">
+          <div>
+            <label class="lbl" for="catInput">Group</label>
+            <input class="inp" id="catInput" type="text" list="catList" placeholder="Carrier bags" />
+            <datalist id="catList">
+              <option value="Carrier bags"></option>
+              <option value="Stationery"></option>
+              <option value="Other"></option>
+            </datalist>
+          </div>
+          <div>
+            <label class="lbl" for="unitInput">Unit <span style="color:var(--muted);font-weight:500">(optional)</span></label>
+            <input class="inp" id="unitInput" type="text" placeholder="pcs / rolls" />
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label class="lbl" for="qtyInput">Quantity in stock</label>
+            <input class="inp" id="qtyInput" type="number" min="0" placeholder="0" />
+          </div>
+          <div>
+            <label class="lbl" for="reorderInput">Reorder at</label>
+            <input class="inp" id="reorderInput" type="number" min="0" placeholder="e.g. 10" />
+          </div>
+        </div>
+        <p class="help">“Reorder at” flags the item when stock falls to that number or below, so you know to buy more.</p>
+
+        <div class="form-actions">
+          <button class="btn-primary" id="saveBtn"><span id="saveText">Save item</span></button>
+          <button class="btn-cancel" id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- low stock alert -->
+      <div class="alert" id="lowAlert">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.4 17.5A1.8 1.8 0 0 0 4 20.2h16a1.8 1.8 0 0 0 1.6-2.7L13.7 3.9a1.8 1.8 0 0 0-3.1 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="lowAlertText"></span>
+      </div>
+
+      <!-- filters -->
+      <div class="filters">
+        <button data-f="all" class="active">All</button>
+        <button data-f="low">Need reorder</button>
+      </div>
+
+      <div id="listWrap"><div class="state"><p>Loading…</p></div></div>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <a href="home.html" class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7M6 10v9h5v-6h2v6h5v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Home</span></a>
+    <a href="catalog.html" class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Catalog</span></a>
+    <a href="reorders.html" class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span>Reorders</span></a>
+    <a href="repairs.html" class="tab"><svg viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-9 9-6 1 1-6 8-10Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><span>Repairs</span></a>
+  </nav>
+
+  <div class="gate" id="gate" style="display:none">Taking you to sign in…</div>
+
+  <script src="config.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let supplies = [];
+    let currentFilter = 'all';
+    let editingId = null;
+    let selectedFile = null;
+    let editingPhotoURL = '';
+    const IMGBB_KEY = window.IMGBB_KEY;
+
+    // known carrier-bag photos — auto-attached to those items if they have none
+    const BAG_PHOTOS = {
+      'L Non-Woven Bags':     'https://i.ibb.co/9kYdfL3f/f55347e86772.jpg',
+      'W-Cut Non-Woven Bags': 'https://i.ibb.co/TqwkXZLw/d0f723d07bd2.jpg',
+      'M Non-Woven Bags':     'https://i.ibb.co/LdByGr6h/bef4b9eedd69.jpg'
+    };
+
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        currentUser = user;
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('gate').style.display = 'none';
+        loadSupplies();
+      }else{
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('gate').style.display = 'flex';
+        window.location.href = 'index.html';
+      }
+    });
+    document.getElementById('logoutBtn').addEventListener('click', ()=> signOut(auth).then(()=>window.location.href='index.html'));
+
+    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    const isLow = s => (s.reorderLevel!=null) && (Number(s.quantity)||0) <= Number(s.reorderLevel);
+    const GROUP_ORDER = ['Carrier bags','Stationery','Other'];
+    function tomorrowISO(){ const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); }
+
+    // ---- photo picker ----
+    const DEFAULT_PHOTO = `<svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l1.5-2h7L17 8h3v11H4V8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.2" stroke="currentColor" stroke-width="1.8"/></svg><p>Tap to add a photo <span style="color:var(--muted)">(optional)</span></p><p class="hint">Helpful for carrier bags</p>`;
+    const photoInput = document.getElementById('photoInput');
+    const photoPick = document.getElementById('photoPick');
+    photoPick.addEventListener('click', ()=>photoInput.click());
+    photoInput.addEventListener('change', ()=>{
+      const f = photoInput.files[0]; if(!f) return;
+      selectedFile = f;
+      const r = new FileReader();
+      r.onload = e=>{ photoPick.innerHTML = `<img src="${e.target.result}" alt=""><p class="hint" style="margin-top:8px">Tap to change photo</p>`; };
+      r.readAsDataURL(f);
+    });
+    function compressImage(file, maxW=900, q=0.8){
+      return new Promise((res,rej)=>{
+        const img=new Image(), reader=new FileReader();
+        reader.onload=e=>img.src=e.target.result; reader.onerror=rej;
+        img.onload=()=>{ let w=img.width,h=img.height; if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+          const c=document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          c.toBlob(b=>b?res(b):rej(new Error('compress')),'image/jpeg',q); };
+        img.onerror=rej; reader.readAsDataURL(file);
+      });
+    }
+    async function uploadPhoto(file){
+      const blob = await compressImage(file);
+      const fd = new FormData(); fd.append('image', blob, 'supply.jpg');
+      const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST', body:fd});
+      const j = await r.json();
+      if(!j.success) throw new Error('Photo upload failed');
+      return j.data.url;
+    }
+
+    // ---- add to reorder (inline panel) ----
+    function toggleReorder(id){
+      const p = document.getElementById('rp-'+id); if(!p) return;
+      p.classList.toggle('open');
+      if(p.classList.contains('open')){ const inp=document.getElementById('rq-'+id); if(inp) inp.focus(); }
+    }
+    async function confirmReorder(id){
+      const s = supplies.find(x=>x.id===id); if(!s) return;
+      const inp = document.getElementById('rq-'+id);
+      const qty = Number(inp.value);
+      if(isNaN(qty) || qty<1){ alert('Please enter a quantity of 1 or more.'); return; }
+      const panel = document.getElementById('rp-'+id);
+      try{
+        await addDoc(collection(db,'reorders'), {
+          itemName: s.name, itemCode:'', photoURL: s.photoURL||'', catalogId:null,
+          quantity: qty, color:'', notes:'',
+          kind:'supply', supplyId:s.id,
+          neededBy: tomorrowISO(),
+          status:'requested',
+          requestedBy: currentUser.email, requestedAt: serverTimestamp()
+        });
+        panel.innerHTML = `<span class="rp-done">\u2713 Added ${qty} to tomorrow's reorder list</span>`;
+        setTimeout(()=>{ if(panel) panel.classList.remove('open'); }, 1800);
+      }catch(e){ alert('Could not add: '+e.message); }
+    }
+
+    // ---- form ----
+    const formCard = document.getElementById('formCard');
+    const nameInput=document.getElementById('nameInput'), catInput=document.getElementById('catInput'),
+          unitInput=document.getElementById('unitInput'), qtyInput=document.getElementById('qtyInput'),
+          reorderInput=document.getElementById('reorderInput'), formMsg=document.getElementById('formMsg'),
+          formTitle=document.getElementById('formTitle'), saveText=document.getElementById('saveText'),
+          saveBtn=document.getElementById('saveBtn');
+
+    document.getElementById('toggleNew').addEventListener('click', ()=>{
+      if(formCard.classList.contains('open')){ resetForm(); }
+      else { resetForm(); formCard.classList.add('open'); formCard.scrollIntoView({behavior:'smooth'}); }
+    });
+    document.getElementById('cancelBtn').addEventListener('click', resetForm);
+
+    function resetForm(){
+      editingId=null;
+      nameInput.value=''; catInput.value=''; unitInput.value=''; qtyInput.value=''; reorderInput.value='';
+      selectedFile=null; editingPhotoURL=''; photoInput.value=''; photoPick.innerHTML=DEFAULT_PHOTO;
+      formTitle.textContent='New supply item'; saveText.textContent='Save item';
+      formMsg.style.display='none'; formCard.classList.remove('open');
+    }
+    function openEdit(s){
+      editingId=s.id;
+      nameInput.value=s.name||''; catInput.value=s.category||''; unitInput.value=s.unit||'';
+      qtyInput.value=(s.quantity!=null)?s.quantity:''; reorderInput.value=(s.reorderLevel!=null)?s.reorderLevel:'';
+      selectedFile=null; editingPhotoURL=s.photoURL||''; photoInput.value='';
+      photoPick.innerHTML = s.photoURL ? `<img src="${s.photoURL}" alt=""><p class="hint" style="margin-top:8px">Tap to change photo</p>` : DEFAULT_PHOTO;
+      formTitle.textContent='Edit supply item'; saveText.textContent='Save changes';
+      formMsg.style.display='none'; formCard.classList.add('open'); formCard.scrollIntoView({behavior:'smooth'});
+    }
+
+    saveBtn.addEventListener('click', async ()=>{
+      formMsg.style.display='none';
+      const name=nameInput.value.trim();
+      if(!name){ formMsg.textContent='Please enter the item name.'; formMsg.style.display='block'; return; }
+      saveBtn.disabled=true; saveText.textContent= selectedFile?'Uploading photo…':'Saving…';
+      try{
+        let photoURL = editingPhotoURL;
+        if(selectedFile){ photoURL = await uploadPhoto(selectedFile); }
+        const data = {
+          name,
+          category: catInput.value.trim() || 'Other',
+          unit: unitInput.value.trim(),
+          quantity: qtyInput.value.trim()==='' ? 0 : Number(qtyInput.value),
+          reorderLevel: reorderInput.value.trim()==='' ? null : Number(reorderInput.value),
+          photoURL: photoURL || ''
+        };
+        if(editingId){
+          await updateDoc(doc(db,'supplies',editingId), data);
+        }else{
+          data.createdBy=currentUser.email; data.createdAt=serverTimestamp();
+          await addDoc(collection(db,'supplies'), data);
+        }
+        resetForm();
+        await loadSupplies();
+      }catch(e){ formMsg.textContent=e.message||'Could not save.'; formMsg.style.display='block'; }
+      finally{ saveBtn.disabled=false; saveText.textContent= editingId?'Save changes':'Save item'; }
+    });
+
+    // ---- filters ----
+    document.querySelectorAll('.filters button').forEach(b=> b.addEventListener('click', ()=>{
+      document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); currentFilter=b.dataset.f; render();
+    }));
+
+    // ---- load + render ----
+    async function loadSupplies(){
+      try{
+        const snap = await getDocs(collection(db,'supplies'));
+        supplies = snap.docs.map(d=>({id:d.id, ...d.data()}));
+        // one-time: attach known carrier-bag photos to items that have none
+        const toFix = supplies.filter(s=> !s.photoURL && BAG_PHOTOS[s.name]);
+        if(toFix.length){
+          await Promise.all(toFix.map(s=> updateDoc(doc(db,'supplies',s.id), { photoURL: BAG_PHOTOS[s.name] })));
+          toFix.forEach(s=> s.photoURL = BAG_PHOTOS[s.name]);
+        }
+        supplies.sort((a,b)=>{
+          const ga=GROUP_ORDER.indexOf(a.category); const gb=GROUP_ORDER.indexOf(b.category);
+          const oa = ga===-1?99:ga, ob = gb===-1?99:gb;
+          return oa-ob || (a.name||'').localeCompare(b.name||'');
+        });
+        render();
+      }catch(e){
+        document.getElementById('listWrap').innerHTML = `<div class="state"><h3>Couldn’t load</h3><p>${escapeHtml(e.message)}</p></div>`;
+      }
+    }
+
+    function updateAlert(){
+      const lows = supplies.filter(isLow);
+      const a = document.getElementById('lowAlert');
+      if(lows.length){ a.classList.add('show'); document.getElementById('lowAlertText').textContent = `${lows.length} item${lows.length===1?'':'s'} ${lows.length===1?'needs':'need'} reordering`; }
+      else a.classList.remove('show');
+    }
+
+    function render(){
+      updateAlert();
+      const wrap = document.getElementById('listWrap');
+
+      if(supplies.length===0){
+        wrap.innerHTML = `<div class="state"><h3>No supplies yet</h3>
+          <p>Add your carrier bags and stationery to start tracking stock.</p>
+          <button class="seedbtn" id="seedBtn">Add the usual items</button></div>`;
+        document.getElementById('seedBtn').addEventListener('click', seedStarters);
+        return;
+      }
+
+      let list = supplies;
+      if(currentFilter==='low') list = supplies.filter(isLow);
+      if(list.length===0){
+        wrap.innerHTML = `<div class="state"><h3>All good</h3><p>Nothing needs reordering right now.</p></div>`;
+        return;
+      }
+
+      // group
+      const groups = {};
+      list.forEach(s=>{ const g = GROUP_ORDER.includes(s.category)?s.category:'Other'; (groups[g]=groups[g]||[]).push(s); });
+      const order = GROUP_ORDER.filter(g=>groups[g]);
+
+      wrap.innerHTML = order.map(g=>{
+        const cards = groups[g].map(s=>{
+          const low = isLow(s);
+          const qty = Number(s.quantity)||0;
+          const meta = [s.unit, (s.reorderLevel!=null?`reorder at ${s.reorderLevel}`:null)].filter(Boolean).join('  ·  ');
+          const pic = s.photoURL ? `<img class="sup-pic" src="${escapeHtml(s.photoURL)}" alt="">` : '';
+          return `<div class="sup ${low?'low':''}">
+            <div class="sup-row">
+              ${pic}
+              <div class="sup-main">
+                <div class="sup-name">${escapeHtml(s.name)} ${low?'<span class="badge b-low">REORDER</span>':''}</div>
+                ${meta?`<div class="sup-meta">${escapeHtml(meta)}</div>`:''}
+              </div>
+              <div class="qty">
+                <div class="qty-cap">In stock</div>
+                <div class="qty-row">
+                  <button class="qbtn" data-dec="${s.id}" aria-label="minus">\u2212</button>
+                  <button class="qnum" data-set="${s.id}">${qty}${s.unit?`<small>${escapeHtml(s.unit)}</small>`:''}</button>
+                  <button class="qbtn" data-inc="${s.id}" aria-label="plus">+</button>
+                </div>
+              </div>
+            </div>
+            <button class="sup-reorder" data-reorder="${s.id}"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Add to reorder list</button>
+            <div class="reorder-panel" id="rp-${s.id}">
+              <div class="rp-cap">How many to order from the warehouse?</div>
+              <div class="rp-row">
+                <input type="number" min="1" id="rq-${s.id}" placeholder="Quantity to order">
+                <button class="rp-add" data-confirm="${s.id}">Add</button>
+              </div>
+            </div>
+            <div class="sup-actions">
+              <button class="a-edit" data-edit="${s.id}">Edit</button>
+              <button class="a-del" data-del="${s.id}">Delete</button>
+            </div>
+          </div>`;
+        }).join('');
+        return `<div class="group-label">${escapeHtml(g)}</div>${cards}`;
+      }).join('');
+
+      wrap.querySelectorAll('[data-inc]').forEach(b=> b.addEventListener('click', ()=>adjustQty(b.dataset.inc, +1)));
+      wrap.querySelectorAll('[data-dec]').forEach(b=> b.addEventListener('click', ()=>adjustQty(b.dataset.dec, -1)));
+      wrap.querySelectorAll('[data-set]').forEach(b=> b.addEventListener('click', ()=>setQty(b.dataset.set)));
+      wrap.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=>{ const s=supplies.find(x=>x.id===b.dataset.edit); if(s) openEdit(s); }));
+      wrap.querySelectorAll('[data-del]').forEach(b=> b.addEventListener('click', ()=>{ const s=supplies.find(x=>x.id===b.dataset.del); if(s) removeSupply(s); }));
+      wrap.querySelectorAll('[data-reorder]').forEach(b=> b.addEventListener('click', ()=> toggleReorder(b.dataset.reorder)));
+      wrap.querySelectorAll('[data-confirm]').forEach(b=> b.addEventListener('click', ()=> confirmReorder(b.dataset.confirm)));
+    }
+
+    async function adjustQty(id, delta){
+      const s = supplies.find(x=>x.id===id); if(!s) return;
+      const newQty = Math.max(0, (Number(s.quantity)||0) + delta);
+      s.quantity = newQty;                 // optimistic
+      render();
+      try{ await updateDoc(doc(db,'supplies',id), { quantity:newQty, updatedBy:currentUser.email, updatedAt:serverTimestamp() }); }
+      catch(e){ alert('Could not update: '+e.message); loadSupplies(); }
+    }
+
+    async function setQty(id){
+      const s = supplies.find(x=>x.id===id); if(!s) return;
+      const v = prompt(`Set quantity for "${s.name}"`, (Number(s.quantity)||0));
+      if(v===null) return;
+      const n = Number(v);
+      if(isNaN(n) || n<0){ alert('Please enter a valid number.'); return; }
+      s.quantity = n; render();
+      try{ await updateDoc(doc(db,'supplies',id), { quantity:n, updatedBy:currentUser.email, updatedAt:serverTimestamp() }); }
+      catch(e){ alert('Could not update: '+e.message); loadSupplies(); }
+    }
+
+    async function removeSupply(s){
+      if(!confirm(`Delete "${s.name}"?\nThis cannot be undone.`)) return;
+      try{ await deleteDoc(doc(db,'supplies',s.id)); await loadSupplies(); }
+      catch(e){ alert('Could not delete: '+e.message); }
+    }
+
+    async function seedStarters(){
+      const starters = [
+        {name:'W-Cut Non-Woven Bags', category:'Carrier bags', unit:'pcs'},
+        {name:'M Non-Woven Bags',     category:'Carrier bags', unit:'pcs'},
+        {name:'L Non-Woven Bags',     category:'Carrier bags', unit:'pcs'},
+        {name:'Barcode Sticker Rolls',category:'Stationery',   unit:'rolls'},
+        {name:'Thermal Receipt Rolls',category:'Stationery',   unit:'rolls'},
+        {name:'Price Tags',           category:'Stationery',   unit:'pcs'},
+        {name:'Tag Codes',            category:'Stationery',   unit:'pcs'}
+      ];
+      try{
+        await Promise.all(starters.map(it=> addDoc(collection(db,'supplies'), {
+          ...it, quantity:0, reorderLevel:0, photoURL: BAG_PHOTOS[it.name]||'', createdBy:currentUser.email, createdAt:serverTimestamp()
+        })));
+        await loadSupplies();
+      }catch(e){ alert('Could not add items: '+e.message); }
+    }
+  </script>
+</body>
+</html>

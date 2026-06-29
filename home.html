@@ -46,13 +46,19 @@
     .stat .num{font-size:26px;font-weight:800;line-height:1}
     .stat .lbl{font-size:12.5px;color:var(--muted);margin-top:4px;font-weight:600}
 
+    .repstats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 14px rgba(26,58,122,.05);overflow:hidden;text-decoration:none;color:inherit}
+    .repstats .rs{padding:15px 6px;text-align:center;border-right:1px solid var(--line)}
+    .repstats .rs:last-child{border-right:none}
+    .repstats .rs-num{font-size:23px;font-weight:800;line-height:1;color:var(--pine)}
+    .repstats .rs-lbl{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600}
+
     .actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .action{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font-size:14.5px;font-weight:700;color:#fff;background:var(--pine);border-radius:13px;padding:15px;box-shadow:0 4px 12px rgba(26,58,122,.15)}
     .action:hover{background:var(--pine-deep)}
     .action svg{width:18px;height:18px}
 
-    .more{display:flex;gap:10px}
-    .more a{flex:1;display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px}
+    .more{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .more a{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px}
     .more a:hover{background:#fafbfc}
     .more .mic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
     .more .mic svg{width:18px;height:18px}
@@ -105,6 +111,14 @@
         </a>
       </div>
 
+      <div class="sec-label">Repairs completed</div>
+      <a class="repstats" href="repairs.html">
+        <div class="rs"><div class="rs-num" id="repToday">–</div><div class="rs-lbl">Today</div></div>
+        <div class="rs"><div class="rs-num" id="repWeek">–</div><div class="rs-lbl">This week</div></div>
+        <div class="rs"><div class="rs-num" id="repMonth">–</div><div class="rs-lbl">This month</div></div>
+        <div class="rs"><div class="rs-num" id="repTotal">–</div><div class="rs-lbl">All time</div></div>
+      </a>
+
       <div class="sec-label">Quick actions</div>
       <div class="actions">
         <a class="action" href="repairs.html?new=1"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>New repair</a>
@@ -120,6 +134,10 @@
         <a href="suggestions.html">
           <div class="mic ic-purple"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 0-4 10c1 .9 1.5 1.6 1.5 3h5c0-1.4.5-2.1 1.5-3A6 6 0 0 0 12 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.5 21h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
           <b>Suggestions</b>
+        </a>
+        <a href="supplies.html">
+          <div class="mic ic-honey"><svg viewBox="0 0 24 24" fill="none"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 7.5 12 12l9-4.5M12 12v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+          <b>Supplies</b>
         </a>
       </div>
     </div>
@@ -137,7 +155,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getCountFromServer, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
@@ -161,6 +179,7 @@
         document.getElementById('greeting').textContent = name ? `${part}, ${name}` : part;
         document.getElementById('whoLabel').textContent = user.email;
         loadCounts();
+        loadRepairStats();
       }else{
         document.getElementById('app').style.display = 'none';
         document.getElementById('gate').style.display = 'flex';
@@ -173,7 +192,7 @@
     async function loadCounts(){
       try{
         const [r, f, rd, s] = await Promise.all([
-          getCountFromServer(query(collection(db,'reorders'), where('status','in',['requested','approved','dispatched']))),
+          getCountFromServer(query(collection(db,'reorders'), where('status','in',['requested','approved','dispatched','partial']))),
           getCountFromServer(query(collection(db,'repairs'),  where('status','==','atFactory'))),
           getCountFromServer(query(collection(db,'repairs'),  where('status','==','ready'))),
           getCountFromServer(query(collection(db,'suggestions'), where('status','==','submitted')))
@@ -184,6 +203,29 @@
         set('statSug', s.data().count);
       }catch(e){
         ['statReorder','statFactory','statReady','statSug'].forEach(id=>set(id,'–'));
+      }
+    }
+    async function loadRepairStats(){
+      try{
+        const snap = await getDocs(query(collection(db,'repairs'), where('status','==','collected')));
+        const now = new Date();
+        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startWeek  = new Date(startToday); startWeek.setDate(startToday.getDate() - ((startToday.getDay()+6)%7)); // Monday start
+        const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        let total=0, today=0, week=0, month=0;
+        snap.forEach(d=>{
+          total++;
+          const ts = d.data().collectedAt;
+          if(ts && ts.toDate){
+            const dt = ts.toDate();
+            if(dt>=startToday) today++;
+            if(dt>=startWeek)  week++;
+            if(dt>=startMonth) month++;
+          }
+        });
+        set('repToday',today); set('repWeek',week); set('repMonth',month); set('repTotal',total);
+      }catch(e){
+        ['repToday','repWeek','repMonth','repTotal'].forEach(id=>set(id,'–'));
       }
     }
   </script>

@@ -195,6 +195,12 @@
     .tab svg{width:22px;height:22px}
     .tab.active{color:var(--pine)}
     .tab:active{background:var(--bg)}
+    /* ---- category filter ---- */
+    .cat-filters{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px}
+    .cat-filters button{flex:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:7px 13px;cursor:pointer;white-space:nowrap}
+    .cat-filters button.active{color:#fff;background:var(--pine);border-color:var(--pine)}
+    .cat-count{font-size:12px;color:var(--muted);margin-bottom:12px}
+    .product .cat{font-size:11px;color:var(--muted);margin-top:2px}
   </style>
 </head>
 <body>
@@ -266,6 +272,9 @@
       </div>
 
       <!-- Products -->
+      <div class="cat-filters" id="catFilters"></div>
+      <div class="cat-count" id="catCount"></div>
+
       <div id="gridWrap">
         <div class="state" id="loadingState">
           <p>Loading products…</p>
@@ -455,6 +464,8 @@
 
     // ---- Load + render ----
     let allProducts = [];
+    let currentCategory = 'all';
+    let searchTerm = '';
     const gridWrap = document.getElementById('gridWrap');
 
     async function loadProducts(){
@@ -463,10 +474,43 @@
         const q = query(collection(db, 'catalog'), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
         allProducts = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-        render(allProducts);
+        buildCategoryChips();
+        applyFilters();
       }catch(err){
         gridWrap.innerHTML = `<div class="state"><h3>Couldn’t load products</h3><p>${err.message}</p></div>`;
       }
+    }
+
+    function buildCategoryChips(){
+      const counts = {};
+      allProducts.forEach(p => { const c=(p.category||'').trim(); if(c) counts[c]=(counts[c]||0)+1; });
+      const cats = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+      const box = document.getElementById('catFilters');
+      if(cats.length===0){ box.innerHTML=''; return; }
+      box.innerHTML = `<button data-cat="all" class="${currentCategory==='all'?'active':''}">All</button>` +
+        cats.map(c=>`<button data-cat="${escapeHtml(c)}" class="${currentCategory===c?'active':''}">${escapeHtml(c)}</button>`).join('');
+      box.querySelectorAll('button').forEach(b=> b.addEventListener('click', ()=>{
+        currentCategory = b.dataset.cat;
+        box.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        applyFilters();
+      }));
+    }
+
+    function applyFilters(){
+      let list = allProducts;
+      if(currentCategory!=='all') list = list.filter(p => (p.category||'')===currentCategory);
+      if(searchTerm){
+        list = list.filter(p =>
+          (p.itemName||'').toLowerCase().includes(searchTerm) ||
+          (p.itemCode||'').toLowerCase().includes(searchTerm) ||
+          (p.shortCode||'').toLowerCase().includes(searchTerm) ||
+          (p.category||'').toLowerCase().includes(searchTerm)
+        );
+      }
+      document.getElementById('catCount').textContent =
+        list.length + (list.length===1?' item':' items') + (currentCategory!=='all'?` in ${currentCategory}`:'');
+      render(list);
     }
 
     function render(list){
@@ -474,8 +518,8 @@
         gridWrap.innerHTML = `
           <div class="state">
             <svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            <h3>No products yet</h3>
-            <p>Tap “Add” to photograph your first bag.</p>
+            <h3>Nothing found</h3>
+            <p>Try a different search or category.</p>
           </div>`;
         return;
       }
@@ -484,14 +528,17 @@
           ? `<img src="${p.photoURL}" alt="${escapeHtml(p.itemName)}" loading="lazy" />`
           : `<span class="noimg">No photo</span>`;
         const chips = (p.colors || []).map(c => `<span class="chip">${escapeHtml(c)}</span>`).join('');
-        const code  = p.itemCode ? `<div class="code">${escapeHtml(p.itemCode)}</div>` : '';
+        const codes = [p.shortCode, p.itemCode].filter(Boolean).map(escapeHtml).join(' · ');
+        const codeLine = codes ? `<div class="code">${codes}</div>` : '';
+        const cat   = p.category ? `<div class="cat">${escapeHtml(p.category)}</div>` : '';
         const par   = (p.parLevel != null) ? `<span class="par">Min ${p.parLevel}</span>` : '';
         return `
           <div class="product">
             <div class="pic">${pic}</div>
             <div class="body">
               <div class="name">${escapeHtml(p.itemName)}</div>
-              ${code}
+              ${cat}
+              ${codeLine}
               ${chips ? `<div class="chips">${chips}</div>` : ''}
               ${par}
             </div>
@@ -501,17 +548,13 @@
     }
 
     function escapeHtml(s){
-      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      return String(s==null?'':s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
     // ---- Search ----
     document.getElementById('searchInput').addEventListener('input', (e) => {
-      const term = e.target.value.trim().toLowerCase();
-      if(!term){ render(allProducts); return; }
-      render(allProducts.filter(p =>
-        (p.itemName || '').toLowerCase().includes(term) ||
-        (p.itemCode || '').toLowerCase().includes(term)
-      ));
+      searchTerm = e.target.value.trim().toLowerCase();
+      applyFilters();
     });
   </script>
 </body>

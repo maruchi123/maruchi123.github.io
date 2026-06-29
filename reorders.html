@@ -339,13 +339,19 @@
       }catch(e){ /* picker stays empty */ }
     }
     const pickerList = document.getElementById('pickerList');
+    const PICK_CAP = 40;
     function renderPicker(list){
-      if(list.length===0){ pickerList.innerHTML = `<div class="picker-empty">No catalog items yet. Use “New item” to add one.</div>`; return; }
-      pickerList.innerHTML = list.map(p=>{
+      if(catalogItems.length===0){ pickerList.innerHTML = `<div class="picker-empty">No catalog items yet. Use “New item” to add one.</div>`; return; }
+      const shown = list.slice(0, PICK_CAP);
+      let html = shown.map(p=>{
         const img = p.photoURL ? `<img src="${p.photoURL}" alt="">` : `<span class="nopic">No photo</span>`;
+        const sub = [p.shortCode, p.category].filter(Boolean).map(escapeHtml).join(' · ');
         return `<div class="pick-item" data-id="${p.id}">${img}
-          <div><div class="pi-name">${escapeHtml(p.itemName)}</div>${p.itemCode?`<div class="pi-code">${escapeHtml(p.itemCode)}</div>`:''}</div></div>`;
+          <div><div class="pi-name">${escapeHtml(p.itemName)}</div>${sub?`<div class="pi-code">${sub}</div>`:''}</div></div>`;
       }).join('');
+      if(list.length===0) html = `<div class="picker-empty">No match. Try another word or use “New item”.</div>`;
+      else if(list.length>PICK_CAP) html += `<div class="picker-empty">Showing ${PICK_CAP} of ${list.length}. Keep typing to narrow.</div>`;
+      pickerList.innerHTML = html;
       pickerList.querySelectorAll('.pick-item').forEach(el=>{
         el.addEventListener('click', ()=> selectCatalogItem(el.dataset.id));
       });
@@ -353,7 +359,10 @@
     document.getElementById('pickerSearch').addEventListener('input', e=>{
       const t = e.target.value.trim().toLowerCase();
       renderPicker(!t ? catalogItems : catalogItems.filter(p=>
-        (p.itemName||'').toLowerCase().includes(t) || (p.itemCode||'').toLowerCase().includes(t)));
+        (p.itemName||'').toLowerCase().includes(t) ||
+        (p.itemCode||'').toLowerCase().includes(t) ||
+        (p.shortCode||'').toLowerCase().includes(t) ||
+        (p.category||'').toLowerCase().includes(t)));
     });
 
     const selectedBanner = document.getElementById('selectedBanner');

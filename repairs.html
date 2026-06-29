@@ -250,6 +250,7 @@
   <!-- printable slip target (direct child of body) -->
   <div id="printArea"></div>
 
+  <script src="config.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -266,7 +267,7 @@
       appId: "1:135197885479:web:b207e35730085761c13a02",
       measurementId: "G-6ZW4E68EL4"
     };
-    const IMGBB_KEY = "a476eb7ccf99b450d620f344d1f65853";
+    const IMGBB_KEY = window.IMGBB_KEY;  // comes from config.js
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);

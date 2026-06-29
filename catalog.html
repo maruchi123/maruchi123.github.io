@@ -299,6 +299,7 @@
     </div>
   </div>
 
+  <script src="config.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -317,7 +318,7 @@
     };
 
     // Your ImgBB key — used to store photos for free
-    const IMGBB_KEY = "a476eb7ccf99b450d620f344d1f65853";
+    const IMGBB_KEY = window.IMGBB_KEY;  // comes from config.js
 
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0F3D38" />
+  <meta name="theme-color" content="#1A3A7A" />
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" href="icon-192.png">
@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      --pine:#0F3D38; --pine-deep:#0A2C28; --honey:#E0A340; --honey-deep:#C8862A;
+      --pine:#1A3A7A; --pine-deep:#122A5C; --honey:#E0A340; --honey-deep:#C8862A;
       --ink:#12211F; --muted:#6B7C79; --line:#E4E8E6; --card:#FFF; --bg:#F1F4F2;
       --radius:16px;
     }
@@ -38,14 +38,14 @@
     .nav-card{
       display:block;text-decoration:none;color:inherit;
       background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-      padding:18px;box-shadow:0 4px 14px rgba(15,61,56,.05);
+      padding:18px;box-shadow:0 4px 14px rgba(26,58,122,.05);
       transition:transform .08s, box-shadow .15s;position:relative;
     }
-    .nav-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,61,56,.10)}
+    .nav-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(26,58,122,.10)}
     .nav-card.soon{opacity:.6;pointer-events:none}
     .nav-card .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
     .nav-card .ic svg{width:23px;height:23px}
-    .ic.a{background:#E5EFEC;color:var(--pine)}
+    .ic.a{background:#E7EDF9;color:var(--pine)}
     .ic.b{background:#FBF1DE;color:var(--honey-deep)}
     .ic.c{background:#EAEFF6;color:#3A5A86}
     .ic.d{background:#F1EAF4;color:#6A4A86}
@@ -60,15 +60,12 @@
 <body>
   <div id="app" style="display:none">
     <div class="topbar">
-      <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 8h14l-1 12H6L5 8Z" fill="#fff"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8" stroke="#C8862A" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+      <div style="height:38px;background:#fff;border-radius:9px;padding:4px 8px;display:flex;align-items:center;flex:none" aria-hidden="true"><img src="logo.png" alt="Isuru Bag Center" style="height:100%;width:auto;display:block"></div>
       <div class="title"><h1>Isuru Bag Center</h1><span>Staff app</span></div>
       <button id="logoutBtn">Sign out</button>
     </div>
 
     <div class="page">
-      <div style="text-align:center;margin-bottom:18px">
-        <img src="logo.png" alt="Isuru Bag Center" style="width:150px;max-width:55%;height:auto">
-      </div>
       <div class="hello">
         <h2 id="greeting">Welcome</h2>
         <p id="whoLabel"></p>

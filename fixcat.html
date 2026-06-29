@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1A3A7A" />
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <title>Fix categories · Isuru Bag Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--pine:#1A3A7A;--muted:#6B7C79;--line:#E4E8E6;--card:#FFF;--bg:#F1F4F2;--ok:#1E7A52;--danger:#B23B3B}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#12211F;background:var(--bg);min-height:100dvh;-webkit-font-smoothing:antialiased}
+    .topbar{background:var(--pine);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+    .topbar a{color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.14)}
+    .topbar a svg{width:18px;height:18px}
+    .topbar h1{font-size:16px;font-weight:700}
+    .page{max-width:540px;margin:0 auto;padding:20px 16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 6px 20px rgba(26,58,122,.06)}
+    .card h2{font-size:18px;font-weight:800;margin-bottom:8px}
+    .card p{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:14px}
+    .list{font-size:13.5px;background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:16px}
+    .list .row{display:flex;justify-content:space-between;padding:4px 0}
+    .list .row b{font-weight:700}
+    .btn{width:100%;font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:var(--pine);border:none;border-radius:12px;padding:15px;cursor:pointer;min-height:52px}
+    .btn:hover{background:#142E61}
+    .btn:disabled{background:var(--muted)}
+    .status{font-size:13px;color:var(--muted);text-align:center;margin-top:12px;min-height:18px}
+    .done{display:none;text-align:center;padding:6px 0}
+    .done.show{display:block}
+    .done .tick{width:54px;height:54px;border-radius:50%;background:#E7F4EC;color:var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+    .done .tick svg{width:28px;height:28px}
+    .done h3{font-size:18px;font-weight:700;margin-bottom:6px}
+    .done a{display:inline-block;margin-top:14px;font-weight:700;color:#fff;background:var(--pine);text-decoration:none;border-radius:11px;padding:12px 22px}
+    .gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div id="app" style="display:none">
+    <div class="topbar"><a href="catalog.html" aria-label="Catalog"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><h1>Fix categories</h1></div>
+    <div class="page">
+      <div class="card" id="setup">
+        <h2>Clean up category names</h2>
+        <p>This scans your catalog and corrects the old split category names to the clean ones. Only the category is changed \u2014 photos and everything else stay exactly as they are.</p>
+        <div class="list" id="preview"><div class="row"><span>Scanning catalog\u2026</span></div></div>
+        <button class="btn" id="fixBtn" disabled>Scanning\u2026</button>
+        <div class="status" id="status"></div>
+      </div>
+      <div class="card done" id="doneCard">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Categories fixed</h3>
+        <p id="doneMsg" style="color:var(--muted);font-size:14px"></p>
+        <a href="catalog.html">Open Catalog</a>
+      </div>
+    </div>
+  </div>
+  <div class="gate" id="gate" style="display:none">Taking you to sign in\u2026</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6n390v89kO0PStNVDv7PeEpWvAqQUVhA",
+      authDomain: "isuru-bag-center.firebaseapp.com",
+      projectId: "isuru-bag-center",
+      storageBucket: "isuru-bag-center.firebasestorage.app",
+      messagingSenderId: "135197885479",
+      appId: "1:135197885479:web:b207e35730085761c13a02"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // old name -> corrected name
+    const REMAP = {
+      'SCHOOL BAG':'SCHOOL BAGS',
+      'SIDE BAG':'LADIES BAGS',
+      'CLASS BAG':'LADIES BAGS'
+    };
+
+    let toFix = [];   // {id, from, to}
+
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        document.getElementById('app').style.display='block';
+        document.getElementById('gate').style.display='none';
+        scan();
+      }else{
+        document.getElementById('app').style.display='none';
+        document.getElementById('gate').style.display='flex';
+        window.location.href='index.html';
+      }
+    });
+
+    async function scan(){
+      const fixBtn=document.getElementById('fixBtn');
+      try{
+        const snap = await getDocs(collection(db,'catalog'));
+        toFix = [];
+        const counts = {};
+        snap.forEach(d=>{
+          const cat = (d.data().category||'').trim();
+          if(REMAP[cat]){
+            toFix.push({ id:d.id, from:cat, to:REMAP[cat] });
+            counts[cat] = (counts[cat]||0)+1;
+          }
+        });
+        const preview = document.getElementById('preview');
+        if(toFix.length===0){
+          preview.innerHTML = `<div class="row"><span>Nothing to fix \u2014 all categories are already clean. \u2705</span></div>`;
+          fixBtn.textContent = 'Nothing to fix';
+          fixBtn.disabled = true;
+          return;
+        }
+        preview.innerHTML = Object.keys(counts).map(k=>
+          `<div class="row"><span><b>${k}</b> &rarr; ${REMAP[k]}</span><b>${counts[k]}</b></div>`
+        ).join('');
+        fixBtn.textContent = `Fix ${toFix.length} item${toFix.length>1?'s':''}`;
+        fixBtn.disabled = false;
+      }catch(e){
+        document.getElementById('preview').innerHTML = `<div class="row"><span>Error: ${e.message}</span></div>`;
+      }
+    }
+
+    document.getElementById('fixBtn').addEventListener('click', async ()=>{
+      const fixBtn=document.getElementById('fixBtn'), status=document.getElementById('status');
+      fixBtn.disabled=true; fixBtn.textContent='Fixing\u2026';
+      const CHUNK=400; let done=0;
+      try{
+        for(let i=0;i<toFix.length;i+=CHUNK){
+          const slice=toFix.slice(i,i+CHUNK);
+          const batch=writeBatch(db);
+          slice.forEach(it=> batch.update(doc(db,'catalog',it.id), { category: it.to }));
+          await batch.commit();
+          done+=slice.length;
+          status.textContent = `Fixed ${done} of ${toFix.length}\u2026`;
+        }
+        document.getElementById('setup').style.display='none';
+        document.getElementById('doneMsg').textContent = `${done} item${done>1?'s':''} corrected. The old category chips are gone.`;
+        document.getElementById('doneCard').classList.add('show');
+      }catch(e){
+        status.textContent = 'Error: ' + e.message;
+        fixBtn.disabled=false; fixBtn.textContent='Try again';
+      }
+    });
+  </script>
+</body>
+</html>
